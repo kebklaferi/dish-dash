@@ -1,0 +1,43 @@
+﻿services:
+  catalogservice:
+    image: catalogservice
+    container_name: catalog_api
+    build:
+      context: .
+      dockerfile: CatalogService/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+        bash -c "dotnet ef database update --no-build && dotnet CatalogService.dll"
+    networks:
+      - catalog-network
+       
+  postgres:
+    image: postgres:16-alpine
+    container_name: catalog-db
+    environment:
+      POSTGRES_USER: cataloguser
+      POSTGRES_PASSWORD: catalogpassword
+      POSTGRES_DB: catalogdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - catalog_data:/var/lib/postgresql/data
+    networks:
+        - catalog-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U cataloguser -d catalogdb" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+      
+volumes:
+    catalog_data:
+      
+networks:
+  catalog-network:
+    driver: bridge
