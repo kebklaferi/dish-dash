@@ -108,12 +108,47 @@
       interval: 10s
       timeout: 5s
       retries: 5
-      
+  
+  identity-db:
+    image: postgres:15
+    container_name: identity-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: identity_db
+    volumes:
+      - identity-db-data:/var/lib/postgresql/data
+    restart: always
+
+  identity-adminer:
+    image: adminer
+    container_name: identity-adminer
+    ports:
+      - "8081:8080"
+    restart: always
+
+  identity-service:
+    build: ./identity-service/.
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: supersecretkey
+      DB_HOST: identity-db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_NAME: identity_db
+    depends_on:
+      - identity-db
+    restart: always
+    
 volumes:
     catalog_data:
     delivery_data:
     orders_data:
-      
+    identity-db-data:
+
 networks:
   catalog-network:
     driver: bridge
