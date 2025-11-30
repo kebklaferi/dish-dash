@@ -22,8 +22,8 @@
       POSTGRES_USER: cataloguser
       POSTGRES_PASSWORD: catalogpassword
       POSTGRES_DB: catalogdb
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     volumes:
       - catalog_data:/var/lib/postgresql/data
     networks:
@@ -35,8 +35,45 @@
       retries: 5
       start_period: 5s
       
+  deliveryservice:
+    image: deliveryservice
+    container_name: delivery_api
+    build:
+      context: .
+      dockerfile: DeliveryService/Dockerfile
+    ports:
+      - "8090:8080"
+    depends_on:
+      postgres-delivery:
+        condition: service_healthy
+    command: >
+        bash -c "dotnet ef database update --no-build && dotnet DeliveryService.dll"
+    networks:
+      - catalog-network
+      
+  postgres-delivery:
+    image: postgres:16-alpine
+    container_name: delivery-db
+    environment:
+      POSTGRES_USER: deliveryuser
+      POSTGRES_PASSWORD: deliverypassword
+      POSTGRES_DB: deliverydb
+    expose:
+      - "5432"
+    volumes:
+      - delivery_data:/var/lib/postgresql/data
+    networks:
+      - catalog-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U deliveryuser -d deliverydb" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+      
 volumes:
     catalog_data:
+    delivery_data:
       
 networks:
   catalog-network:
