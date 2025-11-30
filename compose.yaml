@@ -71,9 +71,48 @@
       retries: 5
       start_period: 5s
       
+  ordersservice:
+    image: ordersservice
+    container_name: orders_service
+    build:
+      context: .
+      dockerfile: OrdersService/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://orders_user:orders_password@postgres-orders:5432/orders_db
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres-orders:
+        condition: service_healthy
+    networks:
+      - catalog-network
+    restart: unless-stopped
+      
+  postgres-orders:
+    image: postgres:16-alpine
+    container_name: orders-db
+    environment:
+      POSTGRES_USER: orders_user
+      POSTGRES_PASSWORD: orders_password
+      POSTGRES_DB: orders_db
+    expose:
+      - "5432"
+    volumes:
+      - orders_data:/var/lib/postgresql/data
+    networks:
+      - catalog-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U orders_user -d orders_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
 volumes:
     catalog_data:
     delivery_data:
+    orders_data:
       
 networks:
   catalog-network:
