@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeliveryService", "DeliveryService\DeliveryService.csproj", "{A6CB719D-B2B7-4040-ABB6-9687FF344DAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,5 +19,9 @@ Global
 		{25A59A5A-F8E1-4A05-A645-51F3607C80F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25A59A5A-F8E1-4A05-A645-51F3607C80F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25A59A5A-F8E1-4A05-A645-51F3607C80F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6CB719D-B2B7-4040-ABB6-9687FF344DAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6CB719D-B2B7-4040-ABB6-9687FF344DAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6CB719D-B2B7-4040-ABB6-9687FF344DAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6CB719D-B2B7-4040-ABB6-9687FF344DAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
