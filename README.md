@@ -1,14 +1,20 @@
-# dish-dash
-SUA projekt
+# Dish-Dash
 
-Catalog service: localhost:8080/swagger
-Delivery service: localhost:8090/swagger
-Orders service: localhost:3001/api-docs
+**SUA Projekt** – Microservices-based application  
 
+## Services & API Docs
 
-Identity service: http://localhost:3000/api-docs/
-Generate JWT using /auth/register and apply the token in open api Auth Bearer.
+| Service            | URL                                      | Notes                                                                 |
+|-------------------|------------------------------------------|-----------------------------------------------------------------------|
+| **Catalog Service**  | [http://localhost:8080/swagger](http://localhost:8080/swagger) | Browse endpoints for catalog operations                                |
+| **Delivery Service** | [http://localhost:8090/swagger](http://localhost:8090/swagger) | Browse endpoints for delivery operations                               |
+| **Orders Service**   | [http://localhost:3001/api-docs](http://localhost:3001/api-docs) | Browse endpoints for orders operations                                  |
+| **Identity Service** | [http://localhost:3000/api-docs/](http://localhost:3000/api-docs/) | Generate JWT using `/auth/register` and apply the token in OpenAPI Bearer Auth |
 
+---
 Adminer: http://localhost:8080
 Login with credetials you've set for postgres db.
 (postgres -> identity-db -> postgres -> password -> identity_db)
+
+
+
