@@ -12,7 +12,7 @@
 | **Identity Service** | [http://localhost:3000/api-docs/](http://localhost:3000/api-docs/) | Generate JWT using `/auth/register` and apply the token in OpenAPI Bearer Auth |
 
 ---
-Adminer: http://localhost:8080
+Adminer: http://localhost:8081
 Login with credetials you've set for postgres db.
 (postgres -> identity-db -> postgres -> password -> identity_db)
 
