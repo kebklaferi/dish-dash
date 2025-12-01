@@ -138,6 +138,119 @@ export class OrdersController {
       }
     }
   }
+
+  // GET /orders/customer/:customerId/recent - Get customer's recent orders
+  async getCustomerRecentOrders(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { customerId } = req.params;
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      if (!customerId) {
+        res.status(400).json({ error: "Customer ID is required" });
+        return;
+      }
+
+      const orders = await ordersService.getCustomerRecentOrders(
+        customerId,
+        limit
+      );
+
+      res.status(200).json(orders);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // POST /orders/:id/cancel - Cancel an order
+  async cancelOrder(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        res.status(400).json({ error: "Order ID is required" });
+        return;
+      }
+
+      const order = await ordersService.cancelOrder(id);
+
+      res.status(200).json(order);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.includes("not found")) {
+          res.status(404).json({ error: error.message });
+        } else {
+          res.status(400).json({ error: error.message });
+        }
+      } else {
+        next(error);
+      }
+    }
+  }
+
+  // PUT /orders/:id/status - Update order status
+  async updateOrderStatus(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!id) {
+        res.status(400).json({ error: "Order ID is required" });
+        return;
+      }
+
+      if (!status) {
+        res.status(400).json({ error: "Status is required" });
+        return;
+      }
+
+      const order = await ordersService.updateOrderStatus(id, status);
+
+      res.status(200).json(order);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("not found")) {
+        res.status(404).json({ error: error.message });
+      } else {
+        next(error);
+      }
+    }
+  }
+
+  // DELETE /orders/customer/:customerId - Delete all customer orders
+  async deleteCustomerOrders(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { customerId } = req.params;
+
+      if (!customerId) {
+        res.status(400).json({ error: "Customer ID is required" });
+        return;
+      }
+
+      const count = await ordersService.deleteCustomerOrders(customerId);
+
+      res.status(200).json({ 
+        message: `Successfully deleted ${count} order(s)`,
+        deletedCount: count 
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new OrdersController();

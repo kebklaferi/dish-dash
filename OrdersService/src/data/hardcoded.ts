@@ -1,6 +1,3 @@
-// Hardcoded data for restaurants and menus
-// This will be replaced with actual service calls later
-
 export const RESTAURANTS = [
   {
     id: "rest_001",

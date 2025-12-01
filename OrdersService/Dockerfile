@@ -20,8 +20,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY prisma.config.ts ./
+COPY OrdersService/package*.json ./
+COPY OrdersService/prisma.config.ts ./
 
 RUN npm install --omit=dev
 
@@ -30,7 +30,7 @@ COPY --from=builder /app/generated ./generated
 
 COPY --from=builder /app/dist ./dist
 
-COPY docker-entrypoint.sh /usr/local/bin/
+COPY OrdersService/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 3001

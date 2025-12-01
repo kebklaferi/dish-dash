@@ -158,6 +158,78 @@ export class OrdersService {
       where: { id },
     });
   }
+
+  // GET - Get customer's recent orders
+  async getCustomerRecentOrders(
+    customerId: string,
+    limit: number = 10
+  ): Promise<Order[]> {
+    const orders = await prisma.order.findMany({
+      where: { customerId },
+      include: {
+        items: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: limit,
+    });
+
+    return orders as Order[];
+  }
+
+  // POST - Cancel an order
+  async cancelOrder(id: string): Promise<Order> {
+    const existingOrder = await this.getOrderById(id);
+    if (!existingOrder) {
+      throw new Error(`Order ${id} not found`);
+    }
+
+    if (existingOrder.status === "delivered") {
+      throw new Error("Cannot cancel a delivered order");
+    }
+
+    if (existingOrder.status === "cancelled") {
+      throw new Error("Order is already cancelled");
+    }
+
+    const order = await prisma.order.update({
+      where: { id },
+      data: { status: "cancelled" },
+      include: {
+        items: true,
+      },
+    });
+
+    return order as Order;
+  }
+
+  // PUT - Update order status only
+  async updateOrderStatus(id: string, status: OrderStatus): Promise<Order> {
+    const existingOrder = await this.getOrderById(id);
+    if (!existingOrder) {
+      throw new Error(`Order ${id} not found`);
+    }
+
+    const order = await prisma.order.update({
+      where: { id },
+      data: { status },
+      include: {
+        items: true,
+      },
+    });
+
+    return order as Order;
+  }
+
+  // DELETE - Delete all orders for a customer
+  async deleteCustomerOrders(customerId: string): Promise<number> {
+    const result = await prisma.order.deleteMany({
+      where: { customerId },
+    });
+
+    return result.count;
+  }
 }
 
 export default new OrdersService();

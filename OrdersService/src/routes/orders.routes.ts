@@ -225,4 +225,168 @@ router.put("/:id", ordersController.updateOrder.bind(ordersController));
  */
 router.delete("/:id", ordersController.deleteOrder.bind(ordersController));
 
+/**
+ * @openapi
+ * /orders/customer/{customerId}/recent:
+ *   get:
+ *     tags:
+ *       - Orders
+ *     summary: Get customer's recent orders
+ *     description: Retrieve the most recent orders for a specific customer
+ *     parameters:
+ *       - in: path
+ *         name: customerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Customer ID
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *           minimum: 1
+ *           maximum: 100
+ *         description: Maximum number of orders to return
+ *     responses:
+ *       200:
+ *         description: List of recent orders retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Invalid customer ID
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/customer/:customerId/recent",
+  ordersController.getCustomerRecentOrders.bind(ordersController)
+);
+
+/**
+ * @openapi
+ * /orders/{id}/cancel:
+ *   post:
+ *     tags:
+ *       - Orders
+ *     summary: Cancel an order
+ *     description: Cancel an order by changing its status to cancelled. Cannot cancel delivered or already cancelled orders.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Order ID (UUID)
+ *     responses:
+ *       200:
+ *         description: Order cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Cannot cancel order (already delivered/cancelled)
+ *       404:
+ *         description: Order not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/:id/cancel",
+  ordersController.cancelOrder.bind(ordersController)
+);
+
+/**
+ * @openapi
+ * /orders/{id}/status:
+ *   put:
+ *     tags:
+ *       - Orders
+ *     summary: Update order status
+ *     description: Update only the status of an order
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Order ID (UUID)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, confirmed, preparing, out_for_delivery, delivered, cancelled]
+ *                 example: preparing
+ *     responses:
+ *       200:
+ *         description: Order status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Invalid request - missing status field
+ *       404:
+ *         description: Order not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/:id/status",
+  ordersController.updateOrderStatus.bind(ordersController)
+);
+
+/**
+ * @openapi
+ * /orders/customer/{customerId}:
+ *   delete:
+ *     tags:
+ *       - Orders
+ *     summary: Delete all customer orders
+ *     description: Permanently delete all orders for a specific customer
+ *     parameters:
+ *       - in: path
+ *         name: customerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Customer ID
+ *     responses:
+ *       200:
+ *         description: All customer orders deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Successfully deleted 5 order(s)
+ *                 deletedCount:
+ *                   type: integer
+ *                   example: 5
+ *       400:
+ *         description: Invalid customer ID
+ *       500:
+ *         description: Internal server error
+ */
+router.delete(
+  "/customer/:customerId",
+  ordersController.deleteCustomerOrders.bind(ordersController)
+);
+
 export default router;
