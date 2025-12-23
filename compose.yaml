@@ -118,6 +118,8 @@
       POSTGRES_DB: identity_db
     volumes:
       - identity-db-data:/var/lib/postgresql/data
+    networks:
+      - catalog-network
     restart: always
 
   adminer:
@@ -125,12 +127,14 @@
     container_name: adminer
     ports:
       - "8081:8080"
+    networks:
+      - catalog-network
     restart: always
 
   identity-service:
     build: ./identity-service/
-    ports:
-      - "${IDENTITY_SERVICE_PORT}:${IDENTITY_SERVICE_PORT}"
+    expose:
+      - "${IDENTITY_SERVICE_PORT}"
     environment:
       PORT: ${IDENTITY_SERVICE_PORT}
       JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
@@ -141,6 +145,8 @@
       DB_NAME: ${IDENTITY_SERVICE_DB_NAME}
     depends_on:
       - identity-db
+    networks:
+      - catalog-network
     restart: always
 
   paymentservice:
