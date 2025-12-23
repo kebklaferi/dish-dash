@@ -5,8 +5,8 @@
     build:
       context: .
       dockerfile: CatalogService/Dockerfile
-    expose:
-      - "8080"
+    ports:
+      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -41,8 +41,8 @@
     build:
       context: .
       dockerfile: DeliveryService/Dockerfile
-    expose:
-      - "8080"
+    ports:
+      - "8090:8080"
     depends_on:
       postgres-delivery:
         condition: service_healthy
@@ -81,8 +81,8 @@
       NODE_ENV: production
       PORT: 3001
       DATABASE_URL: postgresql://orders_user:orders_password@postgres-orders:5432/orders_db
-    expose:
-      - "3001"
+    ports:
+      - "3001:3001"
     depends_on:
       postgres-orders:
         condition: service_healthy
@@ -118,8 +118,6 @@
       POSTGRES_DB: identity_db
     volumes:
       - identity-db-data:/var/lib/postgresql/data
-    networks:
-      - catalog-network
     restart: always
 
   adminer:
@@ -127,14 +125,12 @@
     container_name: adminer
     ports:
       - "8081:8080"
-    networks:
-      - catalog-network
     restart: always
 
   identity-service:
     build: ./identity-service/
-    expose:
-      - "${IDENTITY_SERVICE_PORT}"
+    ports:
+      - "${IDENTITY_SERVICE_PORT}:${IDENTITY_SERVICE_PORT}"
     environment:
       PORT: ${IDENTITY_SERVICE_PORT}
       JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
@@ -145,30 +141,52 @@
       DB_NAME: ${IDENTITY_SERVICE_DB_NAME}
     depends_on:
       - identity-db
-    networks:
-      - catalog-network
     restart: always
 
-  api-gateway:
-    image: nginx:alpine
-    container_name: api-gateway
+  paymentservice:
+    image: paymentservice
+    container_name: payment_service
+    build:
+      context: .
+      dockerfile: PaymentService/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: postgresql://payment_user:payment_password@postgres-payment:5432/payment_db
     ports:
-      - "8088:80"
-    volumes:
-      - ./ApiGateway/nginx.conf:/etc/nginx/nginx.conf:ro
+      - "3002:3002"
     depends_on:
-      - catalogservice
-      - deliveryservice
-      - ordersservice
-      - identity-service
+      postgres-payment:
+        condition: service_healthy
     networks:
-      - catalog-network 
+      - catalog-network
+    restart: unless-stopped
+
+  postgres-payment:
+    image: postgres:16-alpine
+    container_name: payment-db
+    environment:
+      POSTGRES_USER: payment_user
+      POSTGRES_PASSWORD: payment_password
+      POSTGRES_DB: payment_db
+    expose:
+      - "5432"
+    volumes:
+      - payment_data:/var/lib/postgresql/data
+    networks:
+      - catalog-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U payment_user -d payment_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     
 volumes:
     catalog_data:
     delivery_data:
     orders_data:
     identity-db-data:
+    payment_data:
 
 networks:
   catalog-network:
