@@ -2,6 +2,7 @@ import { DataSource } from 'typeorm';
 import { User } from '../models/user.entity';
 import dotenv from 'dotenv';
 
+// TODO fix migrations
 dotenv.config();
 export const AppDataSource = new DataSource({
   type: 'postgres',

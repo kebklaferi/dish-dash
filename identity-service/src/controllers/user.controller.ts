@@ -26,8 +26,12 @@ export const getCurrentUser = (req: Request, res: Response) => {
     const user = (req as any).user;
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const { password, ...userData } = user;
-    res.status(200).json(userData);
+    res.status(200).json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    });
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }

@@ -120,25 +120,25 @@
       - identity-db-data:/var/lib/postgresql/data
     restart: always
 
-  identity-adminer:
+  adminer:
     image: adminer
-    container_name: identity-adminer
+    container_name: adminer
     ports:
       - "8081:8080"
     restart: always
 
   identity-service:
-    build: ./identity-service/.
+    build: ./identity-service/
     ports:
-      - "3000:3000"
+      - "${IDENTITY_SERVICE_PORT}:${IDENTITY_SERVICE_PORT}"
     environment:
-      PORT: 3000
-      JWT_SECRET: supersecretkey
-      DB_HOST: identity-db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: password
-      DB_NAME: identity_db
+      PORT: ${IDENTITY_SERVICE_PORT}
+      JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
+      DB_HOST: ${IDENTITY_SERVICE_DB_HOST}
+      DB_PORT: ${IDENTITY_SERVICE_DB_PORT}
+      DB_USER: ${IDENTITY_SERVICE_DB_USER}
+      DB_PASSWORD: ${IDENTITY_SERVICE_DB_PASSWORD}
+      DB_NAME: ${IDENTITY_SERVICE_DB_NAME}
     depends_on:
       - identity-db
     restart: always
