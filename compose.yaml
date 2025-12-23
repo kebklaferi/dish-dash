@@ -75,8 +75,8 @@
     image: ordersservice
     container_name: orders_service
     build:
-      context: .
-      dockerfile: OrdersService/Dockerfile
+      context: ./OrdersService
+      dockerfile: Dockerfile
     environment:
       NODE_ENV: production
       PORT: 3001
