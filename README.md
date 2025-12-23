@@ -6,10 +6,10 @@
 
 | Service            | URL                                      | Notes                                                                 |
 |-------------------|------------------------------------------|-----------------------------------------------------------------------|
-| **Catalog Service**  | [http://localhost:8080/swagger](http://localhost:8080/swagger) | Browse endpoints for catalog operations                                |
-| **Delivery Service** | [http://localhost:8090/swagger](http://localhost:8090/swagger) | Browse endpoints for delivery operations                               |
-| **Orders Service**   | [http://localhost:3001/api-docs](http://localhost:3001/api-docs) | Browse endpoints for orders operations                                  |
-| **Identity Service** | [http://localhost:3000/api-docs/](http://localhost:3000/api-docs/) | Generate JWT using `/auth/register` and apply the token in OpenAPI Bearer Auth |
+| **Catalog Service**  | [http://localhost:8088/api/catalog/swagger/index.html](http://localhost:8088/api/catalog/swagger/index.html) | Browse endpoints for catalog operations                                |
+| **Delivery Service** | [http://localhost:8088/api/delivery/swagger/index.html](http://localhost:8088/api/delivery/swagger/index.html) | Browse endpoints for delivery operations                               |
+| **Orders Service**   | [http://localhost:8088/api/orders/api-docs/](http://localhost:8088/api/orders/api-docs/) | Browse endpoints for orders operations                                  |
+| **Identity Service** | [http://localhost:8088/api/identity/api-docs/](http://localhost:8088/api/identity/api-docs/) | Generate JWT using `/auth/register` and apply the token in OpenAPI Bearer Auth |
 
 ---
 Adminer: http://localhost:8081

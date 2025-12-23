@@ -5,8 +5,8 @@
     build:
       context: .
       dockerfile: CatalogService/Dockerfile
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -41,8 +41,8 @@
     build:
       context: .
       dockerfile: DeliveryService/Dockerfile
-    ports:
-      - "8090:8080"
+    expose:
+      - "8080"
     depends_on:
       postgres-delivery:
         condition: service_healthy
@@ -81,8 +81,8 @@
       NODE_ENV: production
       PORT: 3001
       DATABASE_URL: postgresql://orders_user:orders_password@postgres-orders:5432/orders_db
-    ports:
-      - "3001:3001"
+    expose:
+      - "3001"
     depends_on:
       postgres-orders:
         condition: service_healthy
@@ -118,6 +118,8 @@
       POSTGRES_DB: identity_db
     volumes:
       - identity-db-data:/var/lib/postgresql/data
+    networks:
+      - catalog-network
     restart: always
 
   adminer:
@@ -125,12 +127,14 @@
     container_name: adminer
     ports:
       - "8081:8080"
+    networks:
+      - catalog-network
     restart: always
 
   identity-service:
     build: ./identity-service/
-    ports:
-      - "${IDENTITY_SERVICE_PORT}:${IDENTITY_SERVICE_PORT}"
+    expose:
+      - "${IDENTITY_SERVICE_PORT}"
     environment:
       PORT: ${IDENTITY_SERVICE_PORT}
       JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
@@ -141,7 +145,24 @@
       DB_NAME: ${IDENTITY_SERVICE_DB_NAME}
     depends_on:
       - identity-db
+    networks:
+      - catalog-network
     restart: always
+
+  api-gateway:
+    image: nginx:alpine
+    container_name: api-gateway
+    ports:
+      - "8088:80"
+    volumes:
+      - ./ApiGateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - catalogservice
+      - deliveryservice
+      - ordersservice
+      - identity-service
+    networks:
+      - catalog-network 
     
 volumes:
     catalog_data:
