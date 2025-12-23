@@ -10,6 +10,7 @@
 | **Delivery Service** | [http://localhost:8090/swagger](http://localhost:8090/swagger) | Browse endpoints for delivery operations                               |
 | **Orders Service**   | [http://localhost:3001/api-docs](http://localhost:3001/api-docs) | Browse endpoints for orders operations                                  |
 | **Identity Service** | [http://localhost:3000/api-docs/](http://localhost:3000/api-docs/) | Generate JWT using `/auth/register` and apply the token in OpenAPI Bearer Auth |
+| **Payment Service** | [http://localhost:8088/api/payment/api-docs/](http://localhost:8088/api/payment/api-docs/) |  Browse endpoints for pyment operations  |
 
 ---
 Adminer: http://localhost:8081
