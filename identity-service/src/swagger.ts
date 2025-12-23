@@ -12,7 +12,7 @@ const options: Options = {
     },
     servers: [
       {
-        url: '/api/identity',
+        url: 'http://localhost:3000',
       },
     ],
     components: {

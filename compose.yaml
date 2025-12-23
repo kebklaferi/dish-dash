@@ -5,8 +5,8 @@
     build:
       context: .
       dockerfile: CatalogService/Dockerfile
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -41,8 +41,8 @@
     build:
       context: .
       dockerfile: DeliveryService/Dockerfile
-    ports:
-      - "8090:8080"
+    expose:
+      - "8080"
     depends_on:
       postgres-delivery:
         condition: service_healthy
@@ -81,8 +81,8 @@
       NODE_ENV: production
       PORT: 3001
       DATABASE_URL: postgresql://orders_user:orders_password@postgres-orders:5432/orders_db
-    ports:
-      - "3001:3001"
+    expose:
+      - "3001"
     depends_on:
       postgres-orders:
         condition: service_healthy
@@ -159,8 +159,8 @@
       NODE_ENV: production
       PORT: 3002
       DATABASE_URL: postgresql://payment_user:payment_password@postgres-payment:5432/payment_db
-    ports:
-      - "3002:3002"
+    expose:
+      - "3002"
     depends_on:
       postgres-payment:
         condition: service_healthy
@@ -186,6 +186,22 @@
       interval: 10s
       timeout: 5s
       retries: 5
+
+  api-gateway:
+    image: nginx:alpine
+    container_name: api-gateway
+    ports:
+      - "8088:80"
+    volumes:
+      - ./ApiGateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - catalogservice
+      - deliveryservice
+      - ordersservice
+      - identity-service
+      - paymentservice
+    networks:
+      - catalog-network 
     
 volumes:
     catalog_data:
