@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String
+  amount        Float
+  currency      String        @default("EUR")
+  status        PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod @default(CARD)
+  
+  // Card details (in real app, these would be tokenized/encrypted)
+  cardLast4     String?
+  cardBrand     String?
+  
+  // Transaction tracking
+  transactionId String?       @unique
+  
+  // Timestamps
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  processedAt   DateTime?
+  
+  // Additional metadata
+  errorMessage  String?
+  metadata      Json?
+
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PaymentHistory {
+  id          String        @id @default(uuid())
+  paymentId   String
+  status      PaymentStatus
+  message     String?
+  createdAt   DateTime      @default(now())
+  
+  @@index([paymentId])
+  @@index([createdAt])
+}
