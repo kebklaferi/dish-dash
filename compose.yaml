@@ -142,12 +142,51 @@
     depends_on:
       - identity-db
     restart: always
+
+  paymentservice:
+    image: paymentservice
+    container_name: payment_service
+    build:
+      context: .
+      dockerfile: PaymentService/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: postgresql://payment_user:payment_password@postgres-payment:5432/payment_db
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres-payment:
+        condition: service_healthy
+    networks:
+      - catalog-network
+    restart: unless-stopped
+
+  postgres-payment:
+    image: postgres:16-alpine
+    container_name: payment-db
+    environment:
+      POSTGRES_USER: payment_user
+      POSTGRES_PASSWORD: payment_password
+      POSTGRES_DB: payment_db
+    expose:
+      - "5432"
+    volumes:
+      - payment_data:/var/lib/postgresql/data
+    networks:
+      - catalog-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U payment_user -d payment_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     
 volumes:
     catalog_data:
     delivery_data:
     orders_data:
     identity-db-data:
+    payment_data:
 
 networks:
   catalog-network:
