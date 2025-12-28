@@ -187,6 +187,86 @@
       timeout: 5s
       retries: 5
 
+  restaurantservice:
+    image: restaurantservice
+    container_name: restaurant_service
+    build:
+      context: ./RestaurantService
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      MONGODB_URI: mongodb://mongodb:27017/restaurant_db
+    expose:
+      - "3003"
+    ports:
+      - "3003:3003"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - catalog-network
+    restart: unless-stopped
+
+  notificationservice:
+    image: notificationservice
+    container_name: notification_service
+    build:
+      context: ./NotificationService
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      MONGODB_URI: mongodb://mongodb-notifications:27017/notification_db
+    expose:
+      - "3004"
+    ports:
+      - "3004:3004"
+    depends_on:
+      mongodb-notifications:
+        condition: service_healthy
+    networks:
+      - catalog-network
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7-jammy
+    container_name: restaurant-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: restaurant_db
+    expose:
+      - "27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - catalog-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  mongodb-notifications:
+    image: mongo:7-jammy
+    container_name: notification-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: notification_db
+    expose:
+      - "27017"
+    volumes:
+      - mongodb_notifications_data:/data/db
+    networks:
+      - catalog-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
   api-gateway:
     image: nginx:alpine
     container_name: api-gateway
@@ -200,6 +280,8 @@
       - ordersservice
       - identity-service
       - paymentservice
+      - restaurantservice
+      - notificationservice
     networks:
       - catalog-network 
     
@@ -209,6 +291,8 @@ volumes:
     orders_data:
     identity-db-data:
     payment_data:
+    mongodb_data:
+    mongodb_notifications_data:
 
 networks:
   catalog-network:
