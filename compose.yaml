@@ -283,7 +283,22 @@
       - restaurantservice
       - notificationservice
     networks:
-      - catalog-network 
+      - catalog-network
+    restart: unless-stopped
+
+  frontend:
+    image: frontend
+    container_name: frontend_app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:3000"
+    depends_on:
+      - api-gateway
+    networks:
+      - catalog-network
+    restart: unless-stopped
     
 volumes:
     catalog_data:

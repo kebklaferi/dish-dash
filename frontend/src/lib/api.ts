@@ -1,7 +1,7 @@
 // API configuration and helper functions
 import { User, UserRole } from '@/types';
 
-export const API_BASE_URL = '/api';
+export const API_BASE_URL = 'http://localhost:8088/api';
 
 export const API_ENDPOINTS = {
   identity: {
@@ -123,6 +123,12 @@ export async function register(credentials: RegisterCredentials): Promise<{ toke
 
     if (!response.ok) {
       const error = await response.json();
+      
+      // Check for duplicate key error
+      if (error.message && error.message.includes('duplicate key value')) {
+        throw new Error('This email is already in use');
+      }
+      
       throw new Error(error.message || 'Registration failed');
     }
 
