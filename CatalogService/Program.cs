@@ -32,12 +32,20 @@ if (app.Environment.IsDevelopment())
 }
 else
 { 
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(c =>
+    {
+        c.RouteTemplate = "api/catalog/swagger/{documentName}/swagger.json";
+    });
+    
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/api/catalog/swagger/v1/swagger.json", "Catalog API V1");
+        c.RoutePrefix = "api/catalog/swagger";
+    });
 }
 
 app.MapControllers();
-app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
+app.MapGet("/api/catalog/health", () => Results.Ok(new { status = "Healthy" }))
    .WithName("GetHealth");
 
 app.Run();

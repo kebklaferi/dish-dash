@@ -1,4 +1,5 @@
 using DeliveryService;
+using DeliveryService.Client;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,13 @@ builder.Services.AddDbContext<DeliveryDbContext>(options =>
             maxRetryDelay: TimeSpan.FromSeconds(10),
             errorCodesToAdd: null
         )));
+builder.Services.AddHttpClient<NotificationClient>(client =>
+{
+    var notificationServiceUrl = builder.Configuration["NotificationService:BaseUrl"] 
+                                 ?? "http://notificationservice:3004";
+    client.BaseAddress = new Uri(notificationServiceUrl);
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
 
 var app = builder.Build();
 
@@ -29,11 +37,19 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwagger(c =>
+{
+    c.RouteTemplate = "api/delivery/swagger/{documentName}/swagger.json";
+});
+
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/api/delivery/swagger/v1/swagger.json", "Delivery Service API V1");
+    c.RoutePrefix = "api/delivery/swagger";
+});
 
 app.MapControllers();
-app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
+app.MapGet("/api/delivery/health", () => Results.Ok(new { status = "Healthy" }))
    .WithName("GetHealth");
 
 app.Run();
