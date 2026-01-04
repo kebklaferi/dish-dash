@@ -4,37 +4,16 @@ import { createPaymentSchema, paymentIdSchema, orderIdSchema } from '../types/sc
 
 export class PaymentController {
   /**
-   * Create a new payment
+   * Create a new payment (auto-processed)
    * POST /api/payments
    */
   async createPayment(req: Request, res: Response) {
     try {
       const validatedData = createPaymentSchema.parse(req.body);
-      const payment = await paymentService.createPayment(validatedData);
-
-      res.status(201).json({
-        success: true,
-        data: payment,
-      });
-    } catch (error: any) {
-      res.status(400).json({
-        success: false,
-        error: error.message || 'Failed to create payment',
-      });
-    }
-  }
-
-  /**
-   * Process a payment
-   * POST /api/payments/:id/process
-   */
-  async processPayment(req: Request, res: Response) {
-    try {
-      const { id } = paymentIdSchema.parse(req.params);
-      const result = await paymentService.processPayment(id);
+      const result = await paymentService.createPayment(validatedData);
 
       if (result.success) {
-        res.status(200).json({
+        res.status(201).json({
           success: true,
           data: result.payment,
           message: result.message,
@@ -48,7 +27,7 @@ export class PaymentController {
     } catch (error: any) {
       res.status(400).json({
         success: false,
-        error: error.message || 'Failed to process payment',
+        error: error.message || 'Failed to create payment',
       });
     }
   }
