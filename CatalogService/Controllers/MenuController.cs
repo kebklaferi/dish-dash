@@ -14,7 +14,7 @@ public class MenuController : ControllerBase
         _dbContext = dbContext;
     }
 
-    [HttpGet("")]
+    [HttpGet]
     public async Task<IActionResult> GetMenuItems([FromQuery(Name = "restaurantId")] int restaurantId)
     {
         var item = await _dbContext.MenuItems
@@ -24,10 +24,10 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet("{itemId:int}")]
-    public async Task<IActionResult> GetMenuItem(int resturant, int itemId)
+    public async Task<IActionResult> GetMenuItem(int restaurant, int itemId)
     {
         var item = await _dbContext.MenuItems
-            .FirstOrDefaultAsync(i => i.restaurant_id == resturant && i.id == itemId && i.available);
+            .FirstOrDefaultAsync(i => i.restaurant_id == restaurant && i.id == itemId && i.available);
       
         if (item == null)
         {
@@ -37,7 +37,7 @@ public class MenuController : ControllerBase
         return Ok(item);
     }
 
-    [HttpPost("")]
+    [HttpPost]
     public async Task<IActionResult> AddMenuItem(int restaurant, [FromBody] Models.MenuItems menuItem)
     {
         menuItem.restaurant_id = restaurant;
@@ -114,7 +114,7 @@ public class MenuController : ControllerBase
         return NoContent();
     }
     
-    [HttpDelete("")]
+    [HttpDelete]
     public async Task<IActionResult> DeleteMenu(int restaurantId)
     {
         var items = await _dbContext.MenuItems
