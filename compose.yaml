@@ -199,8 +199,6 @@
       MONGODB_URI: mongodb://mongodb:27017/restaurant_db
     expose:
       - "3003"
-    ports:
-      - "3003:3003"
     depends_on:
       mongodb:
         condition: service_healthy
@@ -220,8 +218,6 @@
       MONGODB_URI: mongodb://mongodb-notifications:27017/notification_db
     expose:
       - "3004"
-    ports:
-      - "3004:3004"
     depends_on:
       mongodb-notifications:
         condition: service_healthy
