@@ -20,8 +20,26 @@ const swaggerOptions = {
     },
     servers: [
       {
+        url: 'http://localhost:8088/api/payments',
+        description: 'API Gateway',
+      },
+      {
         url: 'http://localhost:3002',
-        description: 'Development server',
+        description: 'Direct Access',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
       },
     ],
   },

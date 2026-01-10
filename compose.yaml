@@ -81,6 +81,7 @@
       NODE_ENV: production
       PORT: 3001
       DATABASE_URL: postgresql://orders_user:orders_password@postgres-orders:5432/orders_db
+      JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
     expose:
       - "3001"
     depends_on:
@@ -120,6 +121,12 @@
       - identity-db-data:/var/lib/postgresql/data
     networks:
       - catalog-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d identity_db" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
     restart: always
 
   adminer:
@@ -144,7 +151,8 @@
       DB_PASSWORD: ${IDENTITY_SERVICE_DB_PASSWORD}
       DB_NAME: ${IDENTITY_SERVICE_DB_NAME}
     depends_on:
-      - identity-db
+      identity-db:
+        condition: service_healthy
     networks:
       - catalog-network
     restart: always
@@ -159,6 +167,7 @@
       NODE_ENV: production
       PORT: 3002
       DATABASE_URL: postgresql://payment_user:payment_password@postgres-payment:5432/payment_db
+      JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
     expose:
       - "3002"
     depends_on:

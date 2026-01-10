@@ -4,7 +4,7 @@ import type { CreatePaymentInput } from '../types/schemas.js';
 
 export class PaymentService {
   /**
-   * Create a new payment
+   * Create a new payment and process it immediately
    */
   async createPayment(data: CreatePaymentInput) {
     const { orderId, amount, currency, paymentMethod, cardNumber, cardholderName } = data;
@@ -28,13 +28,17 @@ export class PaymentService {
     // Create history entry
     await this.addHistory(payment.id, PaymentStatus.PENDING, 'Payment created');
 
-    return payment;
+    // Automatically process the payment
+    const result = await this.processPaymentInternal(payment.id);
+    
+    return result;
   }
 
   /**
    * Process a payment (simulated card processing)
+   * Internal method - called automatically on payment creation
    */
-  async processPayment(paymentId: string) {
+  private async processPaymentInternal(paymentId: string) {
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId },
     });
