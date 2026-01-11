@@ -32,7 +32,7 @@ export function Header() {
             </Avatar>
             <div>
               <p className="text-sm text-muted-foreground">Welcome back</p>
-              <h2 className="font-semibold text-foreground">{user.name}</h2>
+              <h2 className="font-semibold text-foreground">{user.email}</h2>
             </div>
           </div>
           <span className={`px-3 py-1 text-xs font-semibold rounded-full ${badge.className}`}>
