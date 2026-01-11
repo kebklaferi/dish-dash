@@ -1,4 +1,5 @@
 using CatalogService;
+using CatalogService.MockData;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,14 @@ builder.Services.AddDbContext<CatalogDbContext>(options =>
         )));
 
 var app = builder.Build();
+
+// Seed data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+    await context.Database.EnsureCreatedAsync();
+    await DataSeeder.SeedAsync(context);
+}
 
 using (var scope = app.Services.CreateScope())
 {

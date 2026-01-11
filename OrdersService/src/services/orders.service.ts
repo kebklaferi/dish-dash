@@ -6,8 +6,19 @@ import type {
   OrderStatus,
 } from "../types/order.js";
 import { getRestaurantById, getMenuItemById } from "../data/hardcoded.js";
+import { MenuApi } from "../clients/catalog/api.js";
+import { Configuration } from "../clients/catalog/configuration.js";
+import { da } from "zod/v4/locales";
 
 export class OrdersService {
+
+  private catalogClient: MenuApi;
+  constructor() {
+    this.catalogClient = new MenuApi(
+      new Configuration({ basePath: process.env.CATALOG_SERVICE_URL || "http://localhost:8080", })
+    );
+  }
+
   // GET - Get all orders
   async getAllOrders(
     filters?: { status?: OrderStatus; customerId?: string }
@@ -42,19 +53,15 @@ export class OrdersService {
 
   // POST - Create new order
   async createOrder(data: CreateOrderRequest): Promise<Order> {
-    // Validate restaurant exists (using hardcoded data)
-    const restaurant = getRestaurantById(data.restaurantId);
-    if (!restaurant) {
-      throw new Error(`Restaurant ${data.restaurantId} not found`);
-    }
+    const menuItems = await this.catalogClient.apiCatalogGet((data.restaurantId));
 
     // Validate menu items (using hardcoded data)
     for (const item of data.items) {
-      const menuItem = getMenuItemById(item.menuItemId);
+      const menuItem = menuItems.data.find((m => m.id === item.menuItemId));
       if (!menuItem) {
         throw new Error(`Menu item ${item.menuItemId} not found`);
       }
-      if (menuItem.restaurantId !== data.restaurantId) {
+      if (!!menuItem.available) {
         throw new Error(
           `Menu item ${item.menuItemId} does not belong to restaurant ${data.restaurantId}`
         );

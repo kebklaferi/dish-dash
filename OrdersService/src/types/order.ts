@@ -32,10 +32,10 @@ export interface Order {
 
 export interface CreateOrderRequest {
   customerId: string;
-  restaurantId: string;
+  restaurantId: number;
   deliveryAddress: string;
   items: {
-    menuItemId: string;
+    menuItemId: number;
     name: string;
     quantity: number;
     price: number;

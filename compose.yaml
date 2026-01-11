@@ -297,18 +297,18 @@
       - catalog-network 
     restart: unless-stopped
   frontend:
-      image: frontend
-      container_name: frontend_app
-      build:
-        context: ./frontend
-        dockerfile: Dockerfile
-      ports:
-        - "5173:3000"
-      depends_on:
-        - api-gateway
-      networks:
-        - catalog-network
-      restart: unless-stopped
+    image: frontend
+    container_name: frontend_app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:3000"
+    depends_on:
+      - api-gateway
+    networks:
+      - catalog-network
+    restart: unless-stopped
   rabbitmq:
       image: rabbitmq:management-alpine
       container_name: rabbitmq
@@ -323,7 +323,7 @@
       networks:
         - catalog-network
       healthcheck:
-        test: ["CMD", "rabbitmq-diagnostics", "ping"]
+        test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
         interval: 10s
         timeout: 5s
         retries: 5

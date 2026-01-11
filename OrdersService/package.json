@@ -9,7 +9,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "generate:catalog-client": "openapi-generator-cli generate -i ./catalog-openapi.json -g typescript-axios -o src/clients/catalog --additional-properties=supportsES6=true,npmName=catalog-client,typescriptThreePlus=true"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +31,7 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.27.0",
     "@types/amqplib": "^0.10.5",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.7",
