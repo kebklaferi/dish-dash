@@ -28,4 +28,9 @@
         <Link>.dockerignore</Link>
       </Content>
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Migrations\20251130203045_InitialCreate.Designer.cs" />
+      <Compile Remove="Migrations\20251130203045_InitialCreate.cs" />
+    </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CatalogService.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,7 +20,9 @@ namespace CatalogService.Migrations
                     restaurant_id = table.Column<int>(type: "integer", nullable: false),
                     item_name = table.Column<string>(type: "text", nullable: false),
                     price_cents = table.Column<int>(type: "integer", nullable: false),
-                    available = table.Column<bool>(type: "boolean", nullable: false)
+                    available = table.Column<bool>(type: "boolean", nullable: false),
+                    description = table.Column<string>(type: "text", nullable: false),
+                    tags = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CatalogService.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20251130203045_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260111164406_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,6 +35,10 @@ namespace CatalogService.Migrations
                     b.Property<bool>("available")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("item_name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -44,6 +48,10 @@ namespace CatalogService.Migrations
 
                     b.Property<int>("restaurant_id")
                         .HasColumnType("integer");
+
+                    b.Property<string>("tags")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("id");
 
