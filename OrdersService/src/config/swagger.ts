@@ -14,12 +14,12 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "http://localhost:3001",
-        description: "Local development server",
+        url: "http://localhost:8088/api/orders",
+        description: "API Gateway",
       },
       {
-        url: "http://orders_service:3001",
-        description: "Docker container",
+        url: "http://localhost:3001",
+        description: "Direct Access",
       },
     ],
     tags: [
@@ -28,7 +28,20 @@ const options: swaggerJsdoc.Options = {
         description: "Order management operations",
       },
     ],
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
     components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Enter JWT token obtained from /api/auth/login",
+        },
+      },
       schemas: {
         Order: {
           type: "object",

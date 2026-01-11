@@ -12,7 +12,12 @@ const options: Options = {
     },
     servers: [
       {
+        url: 'http://localhost:8088/api/identity',
+        description: 'API Gateway',
+      },
+      {
         url: 'http://localhost:3000',
+        description: 'Direct Access',
       },
     ],
     components: {

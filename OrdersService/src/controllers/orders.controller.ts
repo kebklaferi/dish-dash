@@ -3,19 +3,26 @@ import ordersService from "../services/orders.service.js";
 import type { CreateOrderRequest, UpdateOrderRequest } from "../types/order.js";
 
 export class OrdersController {
-  // GET /orders - Get all orders
+  // GET /orders - Get all orders (user's own orders or all if admin)
   async getAllOrders(
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
-      const { status, customerId } = req.query;
-
-      const orders = await ordersService.getAllOrders({
+      const { status } = req.query;
+      const isAdmin = req.user!.role === 'ADMIN';
+      
+      // Build filter object - only include customerId if not admin
+      const filter: { status?: any; customerId?: string } = {
         status: status as any,
-        customerId: customerId as string,
-      });
+      };
+      
+      if (!isAdmin) {
+        filter.customerId = req.user!.id;
+      }
+
+      const orders = await ordersService.getAllOrders(filter);
 
       res.status(200).json(orders);
     } catch (error) {
@@ -44,6 +51,13 @@ export class OrdersController {
         return;
       }
 
+      // Check ownership unless admin
+      const isAdmin = req.user!.role === 'ADMIN';
+      if (!isAdmin && order.customerId !== req.user!.id) {
+        res.status(403).json({ error: "Access denied" });
+        return;
+      }
+
       res.status(200).json(order);
     } catch (error) {
       next(error);
@@ -57,11 +71,13 @@ export class OrdersController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const orderData: CreateOrderRequest = req.body;
+      const orderData: CreateOrderRequest = {
+        ...req.body,
+        customerId: req.user!.id, // Use authenticated user's ID
+      };
 
       // Basic validation
       if (
-        !orderData.customerId ||
         !orderData.restaurantId ||
         !orderData.deliveryAddress ||
         !orderData.items ||
@@ -69,7 +85,7 @@ export class OrdersController {
       ) {
         res.status(400).json({
           error:
-            "Missing required fields: customerId, restaurantId, deliveryAddress, items",
+            "Missing required fields: restaurantId, deliveryAddress, items",
         });
         return;
       }
@@ -139,20 +155,15 @@ export class OrdersController {
     }
   }
 
-  // GET /orders/customer/:customerId/recent - Get customer's recent orders
+  // GET /orders/me/recent - Get authenticated user's recent orders
   async getCustomerRecentOrders(
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
-      const { customerId } = req.params;
+      const customerId = req.user!.id; // Use authenticated user's ID
       const limit = parseInt(req.query.limit as string) || 10;
-
-      if (!customerId) {
-        res.status(400).json({ error: "Customer ID is required" });
-        return;
-      }
 
       const orders = await ordersService.getCustomerRecentOrders(
         customerId,
@@ -176,6 +187,19 @@ export class OrdersController {
 
       if (!id) {
         res.status(400).json({ error: "Order ID is required" });
+        return;
+      }
+
+      // Check ownership before canceling
+      const existingOrder = await ordersService.getOrderById(id);
+      if (!existingOrder) {
+        res.status(404).json({ error: "Order not found" });
+        return;
+      }
+
+      const isAdmin = req.user!.role === 'ADMIN';
+      if (!isAdmin && existingOrder.customerId !== req.user!.id) {
+        res.status(403).json({ error: "Access denied" });
         return;
       }
 
@@ -227,19 +251,14 @@ export class OrdersController {
     }
   }
 
-  // DELETE /orders/customer/:customerId - Delete all customer orders
+  // DELETE /orders/me - Delete all authenticated user's orders
   async deleteCustomerOrders(
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
-      const { customerId } = req.params;
-
-      if (!customerId) {
-        res.status(400).json({ error: "Customer ID is required" });
-        return;
-      }
+      const customerId = req.user!.id; // Use authenticated user's ID
 
       const count = await ordersService.deleteCustomerOrders(customerId);
 

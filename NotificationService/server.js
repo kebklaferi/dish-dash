@@ -30,7 +30,7 @@ await fastify.register(swagger, {
 });
 
 await fastify.register(swaggerUi, {
-  routePrefix: '/docs',
+  routePrefix: '/api-docs',
   uiConfig: {
     docExpansion: 'list',
     deepLinking: false

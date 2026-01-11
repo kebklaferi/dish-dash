@@ -1,13 +1,18 @@
 import { Router } from 'express';
 import { paymentController } from '../controllers/paymentController.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { adminMiddleware } from '../middlewares/admin.middleware.js';
 
 const router = Router();
+
+// Apply authentication middleware to all routes
+router.use(authMiddleware);
 
 /**
  * @swagger
  * /api/payments:
  *   post:
- *     summary: Create a new payment
+ *     summary: Create and process a payment
  *     tags: [Payments]
  *     requestBody:
  *       required: true
@@ -44,27 +49,9 @@ const router = Router();
  *                 type: string
  *     responses:
  *       201:
- *         description: Payment created successfully
+ *         description: Payment created and processed successfully
  */
 router.post('/', paymentController.createPayment.bind(paymentController));
-
-/**
- * @swagger
- * /api/payments/{id}/process:
- *   post:
- *     summary: Process a payment
- *     tags: [Payments]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Payment processed successfully
- */
-router.post('/:id/process', paymentController.processPayment.bind(paymentController));
 
 /**
  * @swagger
@@ -136,6 +123,6 @@ router.get('/:id/history', paymentController.getPaymentHistory.bind(paymentContr
  *       200:
  *         description: Payment refunded successfully
  */
-router.post('/:id/refund', paymentController.refundPayment.bind(paymentController));
+router.post('/:id/refund', adminMiddleware, paymentController.refundPayment.bind(paymentController));
 
 export default router;
