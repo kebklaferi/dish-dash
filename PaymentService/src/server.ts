@@ -1,11 +1,19 @@
 import app from './app.js';
 import { config } from './config/index.js';
 import { connectDB, disconnectDB } from './db/prisma.js';
+import { rabbitMQ } from './messaging/rabbitmq.js';
+import { messageConsumer } from './messaging/consumer.js';
 
 async function startServer() {
   try {
     // Connect to database
     await connectDB();
+    
+    // Connect to RabbitMQ
+    await rabbitMQ.connect();
+    
+    // Start consuming messages
+    await messageConsumer.startConsumers();
 
     // Start server
     const server = app.listen(config.port, () => {
@@ -17,6 +25,7 @@ async function startServer() {
     const shutdown = async () => {
       console.log('Shutting down...');
       server.close(async () => {
+        await rabbitMQ.close();
         await disconnectDB();
         process.exit(0);
       });

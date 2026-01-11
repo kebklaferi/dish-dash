@@ -82,10 +82,13 @@
       PORT: 3001
       DATABASE_URL: postgresql://orders_user:orders_password@postgres-orders:5432/orders_db
       JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
     expose:
       - "3001"
     depends_on:
       postgres-orders:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - catalog-network
@@ -168,10 +171,13 @@
       PORT: 3002
       DATABASE_URL: postgresql://payment_user:payment_password@postgres-payment:5432/payment_db
       JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
     expose:
       - "3002"
     depends_on:
       postgres-payment:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - catalog-network
@@ -289,6 +295,26 @@
       - notificationservice
     networks:
       - catalog-network 
+
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"     # RabbitMQ main port
+      - "15672:15672"   # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - catalog-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
     
 volumes:
     catalog_data:
@@ -298,6 +324,7 @@ volumes:
     payment_data:
     mongodb_data:
     mongodb_notifications_data:
+    rabbitmq_data:
 
 networks:
   catalog-network:

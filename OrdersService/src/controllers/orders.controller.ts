@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import ordersService from "../services/orders.service.js";
 import type { CreateOrderRequest, UpdateOrderRequest } from "../types/order.js";
+import { messagePublisher } from "../messaging/publisher.js";
 
 export class OrdersController {
   // GET /orders - Get all orders (user's own orders or all if admin)
@@ -75,6 +76,9 @@ export class OrdersController {
         ...req.body,
         customerId: req.user!.id, // Use authenticated user's ID
       };
+      
+      // Extract payment object if provided
+      const payment = req.body.payment;
 
       // Basic validation
       if (
@@ -89,8 +93,42 @@ export class OrdersController {
         });
         return;
       }
+      
+      // Validate payment details if provided
+      if (payment && payment.method !== 'CASH_ON_DELIVERY') {
+        if (!payment.cardNumber || !payment.expiryMonth || !payment.expiryYear || !payment.cvv || !payment.cardholderName) {
+          res.status(400).json({
+            error: "Missing required payment fields for credit card payment",
+          });
+          return;
+        }
+      }
 
+      // Create order with status 'pending' (waiting for payment)
       const order = await ordersService.createOrder(orderData);
+      
+      // If payment method requires processing, send to payment service
+      if (payment && payment.method !== 'CASH_ON_DELIVERY') {
+        // Calculate total amount
+        const totalAmount = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) + (orderData.deliveryFee || 0);
+        
+        // Send payment request to PaymentService via RabbitMQ
+        await messagePublisher.requestPaymentProcessing({
+          orderId: order.id,
+          amount: totalAmount,
+          currency: 'EUR',
+          paymentMethod: payment.method,
+          cardNumber: payment.cardNumber,
+          cardExpiry: `${payment.expiryMonth}/${payment.expiryYear}`,
+          cardCvv: payment.cvv,
+          cardholderName: payment.cardholderName,
+        });
+        
+        console.log(`💳 Payment request sent for order ${order.id}`);
+      } else {
+        // Cash on delivery or no payment - mark as confirmed immediately
+        await ordersService.updateOrderStatus(order.id, 'confirmed');
+      }
 
       res.status(201).json(order);
     } catch (error) {
