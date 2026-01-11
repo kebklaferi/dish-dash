@@ -43,6 +43,12 @@ export interface CreateOrderRequest {
   }[];
   deliveryFee?: number;
   notes?: string;
+  // Payment details
+  paymentMethod?: string;
+  cardNumber?: string;
+  cardExpiry?: string;
+  cardCvv?: string;
+  cardholderName?: string;
 }
 
 export interface UpdateOrderRequest {
