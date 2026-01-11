@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CatalogService.Controllers;
 
 [ApiController]
-[Route("menus")]
+[Route("api/catalog")]
 public class MenuController : ControllerBase
 {
     private readonly CatalogDbContext _dbContext;
@@ -23,11 +23,11 @@ public class MenuController : ControllerBase
         return Ok(item);
     }
 
-    [HttpGet("menus/{itemId:int}")]
-    public async Task<IActionResult> GetMenuItem(int resturant, int itemId)
+    [HttpGet("{itemId:int}")]
+    public async Task<IActionResult> GetMenuItem(int restaurant, int itemId)
     {
         var item = await _dbContext.MenuItems
-            .FirstOrDefaultAsync(i => i.restaurant_id == resturant && i.id == itemId && i.available);
+            .FirstOrDefaultAsync(i => i.restaurant_id == restaurant && i.id == itemId && i.available);
       
         if (item == null)
         {
@@ -37,21 +37,21 @@ public class MenuController : ControllerBase
         return Ok(item);
     }
 
-    [HttpPost("menus")]
-    public async Task<IActionResult> AddMenuItem(int resturant, [FromBody] Models.MenuItems menuItem)
+    [HttpPost]
+    public async Task<IActionResult> AddMenuItem(int restaurant, [FromBody] Models.MenuItems menuItem)
     {
-        menuItem.restaurant_id = resturant;
+        menuItem.restaurant_id = restaurant;
         _dbContext.MenuItems.Add(menuItem);
         await _dbContext.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetMenuItem), new { resturant = resturant, itemId = menuItem.id }, menuItem);
+        return CreatedAtAction(nameof(GetMenuItem), new { resturant = restaurant, itemId = menuItem.id }, menuItem);
     }
 
-    [HttpPost("menus/bulk")]
-    public async Task<IActionResult> CreateItemsBulk(int resturantId, [FromBody] List<Models.MenuItems> menuItems)
+    [HttpPost("bulk")]
+    public async Task<IActionResult> CreateItemsBulk(int restaurantId, [FromBody] List<Models.MenuItems> menuItems)
     {
         foreach (var item in menuItems)
         {
-            item.restaurant_id = resturantId;
+            item.restaurant_id = restaurantId;
         }
 
         await _dbContext.MenuItems.AddRangeAsync(menuItems);
@@ -59,11 +59,11 @@ public class MenuController : ControllerBase
         return Ok(menuItems);
     }
     
-    [HttpPut("menus/{itemId:int}")]
-    public async Task<IActionResult> UpdateMenuItem(int resturant, int itemId, [FromBody] Models.MenuItems updatedItem)
+    [HttpPut("{itemId:int}")]
+    public async Task<IActionResult> UpdateMenuItem(int restaurant, int itemId, [FromBody] Models.MenuItems updatedItem)
     {
         var existingItem = await _dbContext.MenuItems
-            .FirstOrDefaultAsync(i => i.restaurant_id == resturant && i.id == itemId);
+            .FirstOrDefaultAsync(i => i.restaurant_id == restaurant && i.id == itemId);
         
         if (existingItem == null)
         {
@@ -81,11 +81,11 @@ public class MenuController : ControllerBase
         return NoContent();
     }
 
-    [HttpPut("menus/{itemId:int}/availability")]
-    public async Task<IActionResult> UpdateMenuItemAvailability(int resturant, int itemId, [FromBody] bool availability)
+    [HttpPut("{itemId:int}/availability")]
+    public async Task<IActionResult> UpdateMenuItemAvailability(int restaurant, int itemId, [FromBody] bool availability)
     {
         var existingItem = await _dbContext.MenuItems
-            .FirstOrDefaultAsync(i => i.restaurant_id == resturant && i.id == itemId);
+            .FirstOrDefaultAsync(i => i.restaurant_id == restaurant && i.id == itemId);
         if (existingItem == null)
         {
             return NotFound();
@@ -99,11 +99,11 @@ public class MenuController : ControllerBase
         return Ok(existingItem);
     }
 
-    [HttpDelete("menus/{itemId:int}")]
-    public async Task<IActionResult> DeleteMenuItem(int resturant, int itemId)
+    [HttpDelete("{itemId:int}")]
+    public async Task<IActionResult> DeleteMenuItem(int restaurant, int itemId)
     {
         var existingItem = await _dbContext.MenuItems
-            .FirstOrDefaultAsync(i => i.restaurant_id == resturant && i.id == itemId);
+            .FirstOrDefaultAsync(i => i.restaurant_id == restaurant && i.id == itemId);
         if (existingItem == null)
         {
             return NotFound();
@@ -115,10 +115,10 @@ public class MenuController : ControllerBase
     }
     
     [HttpDelete]
-    public async Task<IActionResult> DeleteMenu(int resturantId)
+    public async Task<IActionResult> DeleteMenu(int restaurantId)
     {
         var items = await _dbContext.MenuItems
-            .Where(i => i.restaurant_id == resturantId)
+            .Where(i => i.restaurant_id == restaurantId)
             .ToListAsync();
         
         _dbContext.MenuItems.RemoveRange(items);
