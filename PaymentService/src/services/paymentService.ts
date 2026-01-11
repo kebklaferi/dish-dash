@@ -12,6 +12,9 @@ export class PaymentService {
     // Extract card details (last 4 digits and brand)
     const cardLast4 = cardNumber.slice(-4);
     const cardBrand = this.getCardBrand(cardNumber);
+    
+    // Map payment method to Prisma enum (CREDIT_CARD -> CARD)
+    const mappedPaymentMethod = paymentMethod === 'CREDIT_CARD' ? 'CARD' : paymentMethod;
 
     const payment = await prisma.payment.create({
       data: {
@@ -19,7 +22,7 @@ export class PaymentService {
         amount,
         currency: currency || 'EUR',
         status: PaymentStatus.PENDING,
-        paymentMethod: paymentMethod as PaymentMethod,
+        paymentMethod: mappedPaymentMethod as PaymentMethod,
         cardLast4,
         cardBrand,
       },

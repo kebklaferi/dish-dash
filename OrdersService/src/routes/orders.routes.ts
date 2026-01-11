@@ -129,6 +129,29 @@ router.get("/:id", ordersController.getOrderById.bind(ordersController));
  *               notes:
  *                 type: string
  *                 example: Please ring the doorbell
+ *               payment:
+ *                 type: object
+ *                 description: Payment details (optional for CASH_ON_DELIVERY, required for CREDIT_CARD)
+ *                 properties:
+ *                   method:
+ *                     type: string
+ *                     enum: [CREDIT_CARD, CASH_ON_DELIVERY]
+ *                     example: CREDIT_CARD
+ *                   cardNumber:
+ *                     type: string
+ *                     example: "4111111111111111"
+ *                   cardholderName:
+ *                     type: string
+ *                     example: John Doe
+ *                   expiryMonth:
+ *                     type: string
+ *                     example: "12"
+ *                   expiryYear:
+ *                     type: string
+ *                     example: "2027"
+ *                   cvv:
+ *                     type: string
+ *                     example: "123"
  *     responses:
  *       201:
  *         description: Order created successfully
