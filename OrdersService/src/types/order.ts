@@ -7,13 +7,8 @@ export type OrderStatus =
   | "cancelled";
 
 export interface OrderItem {
-  id: string;
-  orderId: string;
   menuItemId: string;
-  name: string;
   quantity: number;
-  price: number;
-  specialInstructions?: string;
 }
 
 export interface Order {
@@ -32,14 +27,11 @@ export interface Order {
 
 export interface CreateOrderRequest {
   customerId: string;
-  restaurantId: string;
+  restaurantId: number;
   deliveryAddress: string;
   items: {
-    menuItemId: string;
-    name: string;
+    menuItemId: number;
     quantity: number;
-    price: number;
-    specialInstructions?: string;
   }[];
   deliveryFee?: number;
   notes?: string;
@@ -52,13 +44,11 @@ export interface CreateOrderRequest {
 }
 
 export interface UpdateOrderRequest {
+  restaurantId: number;
   deliveryAddress?: string;
   items?: {
-    menuItemId: string;
-    name: string;
+    menuItemId: number;
     quantity: number;
-    price: number;
-    specialInstructions?: string;
   }[];
   notes?: string;
   status?: OrderStatus;

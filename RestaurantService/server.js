@@ -19,8 +19,12 @@ await fastify.register(swagger, {
     },
     servers: [
       {
+        url: 'http://localhost:8088/api/restaurant',
+        description: 'API Gateway'
+      },
+      {
         url: 'http://localhost:3003',
-        description: 'Development server'
+        description: 'Direct service (development only)'
       }
     ],
     tags: [

@@ -6,8 +6,19 @@ import type {
   OrderStatus,
 } from "../types/order.js";
 import { getRestaurantById, getMenuItemById } from "../data/hardcoded.js";
+import { MenuApi } from "../clients/catalog/api.js";
+import { Configuration } from "../clients/catalog/configuration.js";
+import { da } from "zod/v4/locales";
 
 export class OrdersService {
+
+  private catalogClient: MenuApi;
+  constructor() {
+    this.catalogClient = new MenuApi(
+      new Configuration({ basePath: process.env.CATALOG_SERVICE_URL || "http://localhost:8080", })
+    );
+  }
+
   // GET - Get all orders
   async getAllOrders(
     filters?: { status?: OrderStatus; customerId?: string }
@@ -42,27 +53,35 @@ export class OrdersService {
 
   // POST - Create new order
   async createOrder(data: CreateOrderRequest): Promise<Order> {
-    // Validate restaurant exists (using hardcoded data)
-    const restaurant = getRestaurantById(data.restaurantId);
-    if (!restaurant) {
-      throw new Error(`Restaurant ${data.restaurantId} not found`);
-    }
+    const menuItems = await this.catalogClient.apiCatalogGet({
+      restaurantId: data.restaurantId,
+    });
+
+    const catalogItems = menuItems.data;
 
     // Validate menu items (using hardcoded data)
-    for (const item of data.items) {
-      const menuItem = getMenuItemById(item.menuItemId);
+    const enrichedItems = data.items.map((item) => {
+      const menuItem = catalogItems.find((m) => m.id === item.menuItemId);
       if (!menuItem) {
         throw new Error(`Menu item ${item.menuItemId} not found`);
       }
-      if (menuItem.restaurantId !== data.restaurantId) {
+      if (!menuItem.available) {
         throw new Error(
-          `Menu item ${item.menuItemId} does not belong to restaurant ${data.restaurantId}`
+          `Menu item ${item.menuItemId} is not available`
         );
       }
-    }
+      return {
+        menuItemId: String(menuItem.id),
+        name: menuItem.item_name ?? "Unknown Item",
+        quantity: item.quantity,
+        price: menuItem.price_cents || 0,
+      };
+
+
+    });
 
     // Calculate total amount
-    const itemsTotal = data.items.reduce(
+    const itemsTotal = enrichedItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
@@ -73,20 +92,14 @@ export class OrdersService {
     const order = await prisma.order.create({
       data: {
         customerId: data.customerId,
-        restaurantId: data.restaurantId,
+        restaurantId: String(data.restaurantId),
         deliveryAddress: data.deliveryAddress,
         totalAmount,
         deliveryFee,
         notes: data.notes ?? null,
         status: "pending",
         items: {
-          create: data.items.map((item) => ({
-            menuItemId: item.menuItemId,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            specialInstructions: item.specialInstructions ?? null,
-          })),
+          create: enrichedItems,
         },
       },
       include: {
@@ -106,14 +119,42 @@ export class OrdersService {
 
     // If updating items, recalculate total
     let totalAmount = existingOrder.totalAmount;
+    let enrichedItems;
+
     if (data.items) {
       // Delete existing items
+      const menuItems = await this.catalogClient.apiCatalogGet({
+      restaurantId: data.restaurantId,
+    });
+
+    const catalogItems = menuItems.data;
+
+    // Validate menu items (using hardcoded data)
+    enrichedItems = data.items.map((item) => {
+      const menuItem = catalogItems.find((m) => m.id === item.menuItemId);
+      if (!menuItem) {
+        throw new Error(`Menu item ${item.menuItemId} not found`);
+      }
+      if (!menuItem.available) {
+        throw new Error(
+          `Menu item ${item.menuItemId} is not available`
+        );
+      }
+      return {
+        menuItemId: String(menuItem.id),
+        name: menuItem.item_name ?? "Unknown Item",
+        quantity: item.quantity,
+        price: menuItem.price_cents || 0,
+      };
+    });
+
+    // Delete existing items
       await prisma.orderItem.deleteMany({
         where: { orderId: id },
       });
 
       // Calculate new total
-      const itemsTotal = data.items.reduce(
+      const itemsTotal = enrichedItems.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
       );
@@ -129,13 +170,7 @@ export class OrdersService {
         ...(data.items && { totalAmount }),
         ...(data.items && {
           items: {
-            create: data.items.map((item) => ({
-              menuItemId: item.menuItemId,
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-              specialInstructions: item.specialInstructions ?? null,
-            })),
+            create: enrichedItems,
           },
         }),
       },
