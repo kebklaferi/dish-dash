@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Sakura Sushi",
+    "address": "45 Cherry Blossom Ave, Midtown",
+    "workingHours": "12:00 PM - 10:30 PM",
+    "description": "Fresh sushi, sashimi, and traditional Japanese dishes",
+    "phone": "+1-555-0102",
+    "email": "contact@sakurasushi.com",
+    "cuisine": "Japanese",
+    "rating": 3.5,
+    "preparationTime": "25 min",
+    "deliveryFee": 3.0,
+    "imageUrl": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c",
+    "isActive": true
+  },
+  {
+    "name": "Spice Route",
+    "address": "78 Market Rd, Old Town",
+    "workingHours": "10:00 AM - 10:00 PM",
+    "description": "Flavorful Indian curries, tandoori, and street food classics",
+    "phone": "+1-555-0103",
+    "email": "hello@spiceroute.com",
+    "cuisine": "Indian",
+    "rating": 4,
+    "preparationTime": "35 min",
+    "deliveryFee": 2.0,
+    "imageUrl": "https://images.unsplash.com/photo-1585937421612-70a008356fbe",
+    "isActive": true
+  },
+  {
+    "name": "Burger Hub",
+    "address": "210 King St, Financial District",
+    "workingHours": "11:00 AM - 12:00 AM",
+    "description": "Juicy gourmet burgers, loaded fries, and milkshakes",
+    "phone": "+1-555-0104",
+    "email": "support@burgerhub.com",
+    "cuisine": "American",
+    "rating": 3.8,
+    "preparationTime": "20 min",
+    "deliveryFee": 1.5,
+    "imageUrl": "https://images.unsplash.com/photo-1550547660-d9450f859349",
+    "isActive": true
+  },
+  {
+    "name": "Green Bowl",
+    "address": "9 Wellness Ln, Uptown",
+    "workingHours": "8:00 AM - 8:00 PM",
+    "description": "Healthy salads, grain bowls, and vegan-friendly meals",
+    "phone": "+1-555-0105",
+    "email": "eatclean@greenbowl.com",
+    "cuisine": "Healthy",
+    "rating": 4.3,
+    "preparationTime": "15 min",
+    "deliveryFee": 2.0,
+    "imageUrl": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe",
+    "isActive": true
+  },
+  {
+    "name": "Taco Fiesta",
+    "address": "66 Sunset Blvd, West End",
+    "workingHours": "11:00 AM - 11:00 PM",
+    "description": "Authentic Mexican tacos, burritos, and fresh salsas",
+    "phone": "+1-555-0106",
+    "email": "orders@tacofiesta.com",
+    "cuisine": "Mexican",
+    "rating": 4.8,
+    "preparationTime": "18 min",
+    "deliveryFee": 2.5,
+    "imageUrl": "https://images.unsplash.com/photo-1601924582975-7aa5fef7e5c2",
+    "isActive": true
+  }
+]

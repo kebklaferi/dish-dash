@@ -1,22 +1,67 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { restaurants } from '@/data/mockData';
+import { getRestaurantById } from '@/lib/api';
 import { useMeals } from '@/context/MealsContext';
 import { MealCard } from '@/components/MealCard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Star, Clock, Truck, MapPin } from 'lucide-react';
+import { Restaurant } from '@/types';
 
 export default function RestaurantDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getMealsByRestaurant } = useMeals();
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const restaurant = restaurants.find((r) => r.id === id);
+  useEffect(() => {
+    const fetchRestaurant = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        const data = await getRestaurantById(id);
+        
+        // Map the API response to match the Restaurant interface
+        const mappedRestaurant: Restaurant = {
+          id: data._id || data.id,
+          name: data.name,
+          image: data.imageUrl || data.image,
+          cuisine: data.cuisine || 'Various',
+          rating: data.rating || 0,
+          deliveryTime: data.preparationTime || data.deliveryTime || '30-40 min',
+          deliveryFee: data.deliveryFee || 0,
+          description: data.description || '',
+        };
+        
+        setRestaurant(mappedRestaurant);
+        setError(null);
+      } catch (err: any) {
+        console.error('Failed to fetch restaurant:', err);
+        setError(err.message || 'Failed to load restaurant');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRestaurant();
+  }, [id]);
+
   const meals = restaurant ? getMealsByRestaurant(restaurant.id) : [];
 
-  if (!restaurant) {
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <p className="text-muted-foreground mb-4">Restaurant not found</p>
+        <p className="text-muted-foreground">Loading restaurant...</p>
+      </div>
+    );
+  }
+
+  if (error || !restaurant) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <p className="text-muted-foreground mb-4">{error || 'Restaurant not found'}</p>
         <Button onClick={() => navigate('/restaurants')}>Back to Restaurants</Button>
       </div>
     );

@@ -1,13 +1,48 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { restaurants } from '@/data/mockData';
+import { getAllRestaurants } from '@/lib/api';
 import { RestaurantCard } from '@/components/RestaurantCard';
 import { Input } from '@/components/ui/input';
 import { Search, Store } from 'lucide-react';
+import { Restaurant } from '@/types';
 
 export default function Restaurants() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllRestaurants();
+        
+        // Map the API response to match the Restaurant interface
+        const mappedRestaurants = data.map((r: any) => ({
+          id: r._id || r.id,
+          name: r.name,
+          image: r.imageUrl || r.image,
+          cuisine: r.cuisine || 'Various',
+          rating: r.rating || 0,
+          deliveryTime: r.preparationTime || r.deliveryTime || '30-40 min',
+          deliveryFee: r.deliveryFee || 0,
+          description: r.description || '',
+        }));
+        
+        setRestaurants(mappedRestaurants);
+        setError(null);
+      } catch (err: any) {
+        console.error('Failed to fetch restaurants:', err);
+        setError(err.message || 'Failed to load restaurants');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
 
   const filteredRestaurants = useMemo(() => {
     if (!search) return restaurants;
@@ -16,7 +51,7 @@ export default function Restaurants() {
         r.name.toLowerCase().includes(search.toLowerCase()) ||
         r.cuisine.toLowerCase().includes(search.toLowerCase())
     );
-  }, [search]);
+  }, [search, restaurants]);
 
   const cuisines = useMemo(() => {
     return [...new Set(restaurants.map((r) => r.cuisine))];
@@ -66,29 +101,45 @@ export default function Restaurants() {
         </div>
       </section>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="px-4 text-center py-12">
+          <p className="text-muted-foreground">Loading restaurants...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="px-4 text-center py-12">
+          <p className="text-red-500">{error}</p>
+        </div>
+      )}
+
       {/* Restaurants Grid */}
-      <section className="px-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Store className="w-5 h-5 text-primary" />
-          <h2 className="font-semibold text-lg">
-            {search ? `${filteredRestaurants.length} Restaurants` : 'All Restaurants'}
-          </h2>
-        </div>
-        <div className="grid gap-4">
-          {filteredRestaurants.map((restaurant) => (
-            <RestaurantCard
-              key={restaurant.id}
-              restaurant={restaurant}
-              onClick={() => navigate(`/restaurants/${restaurant.id}`)}
-            />
-          ))}
-        </div>
-        {filteredRestaurants.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No restaurants found</p>
+      {!loading && !error && (
+        <section className="px-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Store className="w-5 h-5 text-primary" />
+            <h2 className="font-semibold text-lg">
+              {search ? `${filteredRestaurants.length} Restaurants` : 'All Restaurants'}
+            </h2>
           </div>
-        )}
-      </section>
+          <div className="grid gap-4">
+            {filteredRestaurants.map((restaurant) => (
+              <RestaurantCard
+                key={restaurant.id}
+                restaurant={restaurant}
+                onClick={() => navigate(`/restaurants/${restaurant.id}`)}
+              />
+            ))}
+          </div>
+          {filteredRestaurants.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No restaurants found</p>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
