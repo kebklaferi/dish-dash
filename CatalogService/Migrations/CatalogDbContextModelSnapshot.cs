@@ -32,6 +32,10 @@ namespace CatalogService.Migrations
                     b.Property<bool>("available")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("item_name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -41,6 +45,10 @@ namespace CatalogService.Migrations
 
                     b.Property<int>("restaurant_id")
                         .HasColumnType("integer");
+
+                    b.Property<string>("tags")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("id");
 

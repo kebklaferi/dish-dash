@@ -295,25 +295,6 @@
       - notificationservice
     networks:
       - catalog-network
-
-  rabbitmq:
-    image: rabbitmq:management-alpine
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"     # RabbitMQ main port
-      - "15672:15672"   # Management UI
-    environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin123
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    networks:
-      - catalog-network
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     restart: unless-stopped
 
   frontend:
@@ -329,7 +310,27 @@
     networks:
       - catalog-network
     restart: unless-stopped
-    
+
+  rabbitmq:
+      image: rabbitmq:management-alpine
+      container_name: rabbitmq
+      ports:
+        - "5672:5672"     # RabbitMQ main port
+        - "15672:15672"   # Management UI
+      environment:
+        RABBITMQ_DEFAULT_USER: admin
+        RABBITMQ_DEFAULT_PASS: admin123
+      volumes:
+        - rabbitmq_data:/var/lib/rabbitmq
+      networks:
+        - catalog-network
+      healthcheck:
+        test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+      restart: unless-stopped
+      
 volumes:
     catalog_data:
     delivery_data:

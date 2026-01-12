@@ -109,13 +109,10 @@ export class OrdersController {
       
       // If payment method requires processing, send to payment service
       if (payment && payment.method !== 'CASH_ON_DELIVERY') {
-        // Calculate total amount
-        const totalAmount = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) + (orderData.deliveryFee || 0);
-        
         // Send payment request to PaymentService via RabbitMQ
         await messagePublisher.requestPaymentProcessing({
           orderId: order.id,
-          amount: totalAmount,
+          amount: order.totalAmount,
           currency: 'EUR',
           paymentMethod: payment.method,
           cardNumber: payment.cardNumber,

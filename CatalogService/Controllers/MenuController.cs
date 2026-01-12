@@ -15,7 +15,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetMenuItems([FromQuery(Name = "restaurantId")] int restaurantId)
+    public async Task<ActionResult<List<Models.MenuItems>>> GetMenuItems([FromQuery(Name = "restaurantId")] int restaurantId)
     {
         var item = await _dbContext.MenuItems
             .Where(i => i.restaurant_id == restaurantId && i.available)
@@ -24,7 +24,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet("{itemId:int}")]
-    public async Task<IActionResult> GetMenuItem(int restaurant, int itemId)
+    public async Task<ActionResult<Models.MenuItems>> GetMenuItem(int restaurant, int itemId)
     {
         var item = await _dbContext.MenuItems
             .FirstOrDefaultAsync(i => i.restaurant_id == restaurant && i.id == itemId && i.available);
@@ -38,7 +38,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddMenuItem(int restaurant, [FromBody] Models.MenuItems menuItem)
+    public async Task<ActionResult<Models.MenuItems>> AddMenuItem(int restaurant, [FromBody] Models.MenuItems menuItem)
     {
         menuItem.restaurant_id = restaurant;
         _dbContext.MenuItems.Add(menuItem);
@@ -47,7 +47,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost("bulk")]
-    public async Task<IActionResult> CreateItemsBulk(int restaurantId, [FromBody] List<Models.MenuItems> menuItems)
+    public async Task<ActionResult<List<Models.MenuItems>>> CreateItemsBulk(int restaurantId, [FromBody] List<Models.MenuItems> menuItems)
     {
         foreach (var item in menuItems)
         {

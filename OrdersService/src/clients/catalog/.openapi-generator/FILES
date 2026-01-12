@@ -1,0 +1,15 @@
+.gitignore
+.npmignore
+README.md
+api.ts
+base.ts
+common.ts
+configuration.ts
+docs/CatalogServiceApi.md
+docs/MenuApi.md
+docs/MenuItems.md
+git_push.sh
+index.ts
+package.json
+tsconfig.esm.json
+tsconfig.json
