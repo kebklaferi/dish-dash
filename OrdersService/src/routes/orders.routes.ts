@@ -11,7 +11,7 @@ router.use(authMiddleware);
 /**
  * @openapi
  * /orders:
- *   get:
+*   get:
  *     tags:
  *       - Orders
  *     summary: Get orders
@@ -76,7 +76,7 @@ router.get("/:id", ordersController.getOrderById.bind(ordersController));
  *     tags:
  *       - Orders
  *     summary: Create a new order
- *     description: Create a new food delivery order for the authenticated user. Restaurant and menu items are validated against hardcoded data.
+ *     description: Create a new food delivery order. Menu item details (name, price) are automatically fetched from CatalogService.
  *     requestBody:
  *       required: true
  *       content:
@@ -89,8 +89,8 @@ router.get("/:id", ordersController.getOrderById.bind(ordersController));
  *               - items
  *             properties:
  *               restaurantId:
- *                 type: string
- *                 example: rest_001
+ *                 type: integer
+ *                 example: 1
  *               deliveryAddress:
  *                 type: string
  *                 example: 123 Main St, Apt 4B
@@ -101,27 +101,18 @@ router.get("/:id", ordersController.getOrderById.bind(ordersController));
  *                   type: object
  *                   required:
  *                     - menuItemId
- *                     - name
  *                     - quantity
- *                     - price
  *                   properties:
  *                     menuItemId:
- *                       type: string
- *                       example: menu_001
- *                     name:
- *                       type: string
- *                       example: Margherita Pizza
+ *                       type: integer
+ *                       example: 1
  *                     quantity:
  *                       type: integer
  *                       minimum: 1
  *                       example: 2
- *                     price:
- *                       type: number
- *                       format: float
- *                       example: 12.99
  *                     specialInstructions:
  *                       type: string
- *                       example: Extra cheese
+ *                       example: Extra cheese, no onions
  *               deliveryFee:
  *                 type: number
  *                 format: float
@@ -129,29 +120,6 @@ router.get("/:id", ordersController.getOrderById.bind(ordersController));
  *               notes:
  *                 type: string
  *                 example: Please ring the doorbell
- *               payment:
- *                 type: object
- *                 description: Payment details (optional for CASH_ON_DELIVERY, required for CREDIT_CARD)
- *                 properties:
- *                   method:
- *                     type: string
- *                     enum: [CREDIT_CARD, CASH_ON_DELIVERY]
- *                     example: CREDIT_CARD
- *                   cardNumber:
- *                     type: string
- *                     example: "4111111111111111"
- *                   cardholderName:
- *                     type: string
- *                     example: John Doe
- *                   expiryMonth:
- *                     type: string
- *                     example: "12"
- *                   expiryYear:
- *                     type: string
- *                     example: "2027"
- *                   cvv:
- *                     type: string
- *                     example: "123"
  *     responses:
  *       201:
  *         description: Order created successfully
@@ -160,7 +128,7 @@ router.get("/:id", ordersController.getOrderById.bind(ordersController));
  *             schema:
  *               $ref: '#/components/schemas/Order'
  *       400:
- *         description: Invalid request - missing required fields or invalid restaurant/menu items
+ *         description: Invalid request - missing required fields or invalid menu items
  *       500:
  *         description: Internal server error
  */
@@ -173,7 +141,7 @@ router.post("/", ordersController.createOrder.bind(ordersController));
  *     tags:
  *       - Orders
  *     summary: Update order
- *     description: Update an existing order's details, items, or status
+ *     description: Update an existing order's details, items, or status (Admin only)
  *     parameters:
  *       - in: path
  *         name: id
@@ -191,12 +159,28 @@ router.post("/", ordersController.createOrder.bind(ordersController));
  *             properties:
  *               deliveryAddress:
  *                 type: string
+ *                 example: 456 Oak Ave
  *               items:
  *                 type: array
  *                 items:
  *                   type: object
+ *                   required:
+ *                     - menuItemId
+ *                     - quantity
+ *                   properties:
+ *                     menuItemId:
+ *                       type: integer
+ *                       example: 2
+ *                     quantity:
+ *                       type: integer
+ *                       minimum: 1
+ *                       example: 1
+ *                     specialInstructions:
+ *                       type: string
+ *                       example: Well done
  *               notes:
  *                 type: string
+ *                 example: Updated delivery instructions
  *               status:
  *                 type: string
  *                 enum: [pending, confirmed, preparing, out_for_delivery, delivered, cancelled]
@@ -209,6 +193,8 @@ router.post("/", ordersController.createOrder.bind(ordersController));
  *               $ref: '#/components/schemas/Order'
  *       400:
  *         description: Invalid request body or order ID
+ *       403:
+ *         description: Access denied
  *       404:
  *         description: Order not found
  *       500:
@@ -223,7 +209,7 @@ router.put("/:id", adminMiddleware, ordersController.updateOrder.bind(ordersCont
  *     tags:
  *       - Orders
  *     summary: Delete order
- *     description: Permanently delete an order and all its items
+ *     description: Permanently delete an order and all its items (Admin only)
  *     parameters:
  *       - in: path
  *         name: id
@@ -237,6 +223,8 @@ router.put("/:id", adminMiddleware, ordersController.updateOrder.bind(ordersCont
  *         description: Order deleted successfully (no content)
  *       400:
  *         description: Invalid order ID
+ *       403:
+ *         description: Access denied
  *       404:
  *         description: Order not found
  *       500:
@@ -303,6 +291,8 @@ router.get(
  *               $ref: '#/components/schemas/Order'
  *       400:
  *         description: Cannot cancel order (already delivered/cancelled)
+ *       403:
+ *         description: Access denied
  *       404:
  *         description: Order not found
  *       500:
@@ -320,7 +310,7 @@ router.post(
  *     tags:
  *       - Orders
  *     summary: Update order status
- *     description: Update only the status of an order
+ *     description: Update only the status of an order (Admin only)
  *     parameters:
  *       - in: path
  *         name: id
@@ -351,6 +341,8 @@ router.post(
  *               $ref: '#/components/schemas/Order'
  *       400:
  *         description: Invalid request - missing status field
+ *       403:
+ *         description: Access denied
  *       404:
  *         description: Order not found
  *       500:
@@ -364,7 +356,7 @@ router.put(
 
 /**
  * @openapi
- * /orders/me:
+* /orders/me:
  *   delete:
  *     tags:
  *       - Orders
