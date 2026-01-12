@@ -88,7 +88,11 @@ fastify.get('/restaurants', {
                 name: { type: 'string' },
                 address: { type: 'string' },
                 workingHours: { type: 'string' },
-                description: { type: 'string' }
+                description: { type: 'string' },
+                rating: { type: 'number' },
+                preparationTime: { type: 'string' },
+                imageUrl: { type: 'string' },
+                deliveryFee: { type: 'number' }
               }
             }
           }
@@ -101,7 +105,7 @@ fastify.get('/restaurants', {
     const { isActive } = request.query;
     const filter = isActive !== undefined ? { isActive: isActive === 'true' } : {};
     
-    const restaurants = await Restaurant.find(filter).select('name address workingHours description');
+    const restaurants = await Restaurant.find(filter).select('name address workingHours description rating preparationTime imageUrl deliveryFee');
     return {
       success: true,
       count: restaurants.length,
@@ -148,6 +152,9 @@ fastify.get('/restaurants/:id', {
               email: { type: 'string' },
               cuisine: { type: 'string' },
               rating: { type: 'number' },
+              preparationTime: { type: 'string' },
+              imageUrl: { type: 'string' },
+              deliveryFee: { type: 'number' },
               isActive: { type: 'boolean' }
             }
           }
@@ -210,7 +217,11 @@ fastify.post('/restaurants', {
         description: { type: 'string', description: 'Opis restavracije' },
         phone: { type: 'string', description: 'Telefonska številka' },
         email: { type: 'string', description: 'Email naslov' },
-        cuisine: { type: 'string', description: 'Tip kuhinje' }
+        cuisine: { type: 'string', description: 'Tip kuhinje' },
+        rating: { type: 'number', description: 'Ocena restavracije (0-5)' },
+        preparationTime: { type: 'string', description: 'Čas priprave (npr. "30 min")' },
+        imageUrl: { type: 'string', description: 'URL slike restavracije' },
+        deliveryFee: { type: 'number', description: 'Cena dostave' }
       }
     },
     response: {
@@ -226,7 +237,7 @@ fastify.post('/restaurants', {
   }
 }, async (request, reply) => {
   try {
-    const { name, address, workingHours, description, phone, email, cuisine } = request.body;
+    const { name, address, workingHours, description, phone, email, cuisine, rating, preparationTime, imageUrl, deliveryFee } = request.body;
 
     if (!name || !address || !workingHours || !description) {
       return reply.status(400).send({
@@ -242,7 +253,11 @@ fastify.post('/restaurants', {
       description,
       phone,
       email,
-      cuisine
+      cuisine,
+      rating,
+      preparationTime,
+      imageUrl,
+      deliveryFee
     });
 
     await restaurant.save();
@@ -281,7 +296,11 @@ fastify.post('/restaurants/bulk', {
               description: { type: 'string' },
               phone: { type: 'string' },
               email: { type: 'string' },
-              cuisine: { type: 'string' }
+              cuisine: { type: 'string' },
+              rating: { type: 'number' },
+              preparationTime: { type: 'string' },
+              imageUrl: { type: 'string' },
+              deliveryFee: { type: 'number' }
             }
           }
         }
@@ -346,7 +365,11 @@ fastify.put('/restaurants/:id', {
         description: { type: 'string' },
         phone: { type: 'string' },
         email: { type: 'string' },
-        cuisine: { type: 'string' }
+        cuisine: { type: 'string' },
+        rating: { type: 'number' },
+        preparationTime: { type: 'string' },
+        imageUrl: { type: 'string' },
+        deliveryFee: { type: 'number' }
       }
     },
     response: {

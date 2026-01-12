@@ -4,7 +4,7 @@ export const createPaymentSchema = z.object({
   orderId: z.string().uuid(),
   amount: z.number().positive(),
   currency: z.string().length(3).default('EUR'),
-  paymentMethod: z.enum(['CARD']),
+  paymentMethod: z.enum(['CARD', 'CREDIT_CARD']),
   cardNumber: z.string().regex(/^\d{16}$/),
   cardExpiry: z.string().regex(/^\d{2}\/\d{2}$/),
   cardCvv: z.string().regex(/^\d{3,4}$/),
