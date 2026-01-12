@@ -13,15 +13,15 @@
  */
 
 
-import type { Configuration } from './configuration';
+import type { Configuration } from './configuration.js';
 import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common';
-import type { RequestArgs } from './base';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common.js';
+import type { RequestArgs } from './base.js';
 // @ts-ignore
-import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
+import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base.js';
 
 export interface MenuItems {
     'id'?: number;
@@ -547,86 +547,150 @@ export const MenuApiFactory = function (configuration?: Configuration, basePath?
     return {
         /**
          * 
-         * @param {number} [restaurantId] 
-         * @param {Array<MenuItems>} [menuItems] 
+         * @param {MenuApiApiCatalogBulkPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiCatalogBulkPost(restaurantId?: number, menuItems?: Array<MenuItems>, options?: RawAxiosRequestConfig): AxiosPromise<Array<MenuItems>> {
-            return localVarFp.apiCatalogBulkPost(restaurantId, menuItems, options).then((request) => request(axios, basePath));
+        apiCatalogBulkPost(requestParameters: MenuApiApiCatalogBulkPostRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<Array<MenuItems>> {
+            return localVarFp.apiCatalogBulkPost(requestParameters.restaurantId, requestParameters.menuItems, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @param {number} [restaurantId] 
+         * @param {MenuApiApiCatalogDeleteRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiCatalogDelete(restaurantId?: number, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.apiCatalogDelete(restaurantId, options).then((request) => request(axios, basePath));
+        apiCatalogDelete(requestParameters: MenuApiApiCatalogDeleteRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiCatalogDelete(requestParameters.restaurantId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @param {number} [restaurantId] 
+         * @param {MenuApiApiCatalogGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiCatalogGet(restaurantId?: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<MenuItems>> {
-            return localVarFp.apiCatalogGet(restaurantId, options).then((request) => request(axios, basePath));
+        apiCatalogGet(requestParameters: MenuApiApiCatalogGetRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<Array<MenuItems>> {
+            return localVarFp.apiCatalogGet(requestParameters.restaurantId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @param {number} itemId 
-         * @param {number} [restaurant] 
-         * @param {boolean} [body] 
+         * @param {MenuApiApiCatalogItemIdAvailabilityPutRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiCatalogItemIdAvailabilityPut(itemId: number, restaurant?: number, body?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.apiCatalogItemIdAvailabilityPut(itemId, restaurant, body, options).then((request) => request(axios, basePath));
+        apiCatalogItemIdAvailabilityPut(requestParameters: MenuApiApiCatalogItemIdAvailabilityPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiCatalogItemIdAvailabilityPut(requestParameters.itemId, requestParameters.restaurant, requestParameters.body, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @param {number} itemId 
-         * @param {number} [restaurant] 
+         * @param {MenuApiApiCatalogItemIdDeleteRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiCatalogItemIdDelete(itemId: number, restaurant?: number, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.apiCatalogItemIdDelete(itemId, restaurant, options).then((request) => request(axios, basePath));
+        apiCatalogItemIdDelete(requestParameters: MenuApiApiCatalogItemIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiCatalogItemIdDelete(requestParameters.itemId, requestParameters.restaurant, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @param {number} itemId 
-         * @param {number} [restaurant] 
+         * @param {MenuApiApiCatalogItemIdGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiCatalogItemIdGet(itemId: number, restaurant?: number, options?: RawAxiosRequestConfig): AxiosPromise<MenuItems> {
-            return localVarFp.apiCatalogItemIdGet(itemId, restaurant, options).then((request) => request(axios, basePath));
+        apiCatalogItemIdGet(requestParameters: MenuApiApiCatalogItemIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<MenuItems> {
+            return localVarFp.apiCatalogItemIdGet(requestParameters.itemId, requestParameters.restaurant, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @param {number} itemId 
-         * @param {number} [restaurant] 
-         * @param {MenuItems} [menuItems] 
+         * @param {MenuApiApiCatalogItemIdPutRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiCatalogItemIdPut(itemId: number, restaurant?: number, menuItems?: MenuItems, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.apiCatalogItemIdPut(itemId, restaurant, menuItems, options).then((request) => request(axios, basePath));
+        apiCatalogItemIdPut(requestParameters: MenuApiApiCatalogItemIdPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiCatalogItemIdPut(requestParameters.itemId, requestParameters.restaurant, requestParameters.menuItems, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @param {number} [restaurant] 
-         * @param {MenuItems} [menuItems] 
+         * @param {MenuApiApiCatalogPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiCatalogPost(restaurant?: number, menuItems?: MenuItems, options?: RawAxiosRequestConfig): AxiosPromise<MenuItems> {
-            return localVarFp.apiCatalogPost(restaurant, menuItems, options).then((request) => request(axios, basePath));
+        apiCatalogPost(requestParameters: MenuApiApiCatalogPostRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<MenuItems> {
+            return localVarFp.apiCatalogPost(requestParameters.restaurant, requestParameters.menuItems, options).then((request) => request(axios, basePath));
         },
     };
 };
+
+/**
+ * Request parameters for apiCatalogBulkPost operation in MenuApi.
+ */
+export interface MenuApiApiCatalogBulkPostRequest {
+    readonly restaurantId?: number
+
+    readonly menuItems?: Array<MenuItems>
+}
+
+/**
+ * Request parameters for apiCatalogDelete operation in MenuApi.
+ */
+export interface MenuApiApiCatalogDeleteRequest {
+    readonly restaurantId?: number
+}
+
+/**
+ * Request parameters for apiCatalogGet operation in MenuApi.
+ */
+export interface MenuApiApiCatalogGetRequest {
+    readonly restaurantId?: number
+}
+
+/**
+ * Request parameters for apiCatalogItemIdAvailabilityPut operation in MenuApi.
+ */
+export interface MenuApiApiCatalogItemIdAvailabilityPutRequest {
+    readonly itemId: number
+
+    readonly restaurant?: number
+
+    readonly body?: boolean
+}
+
+/**
+ * Request parameters for apiCatalogItemIdDelete operation in MenuApi.
+ */
+export interface MenuApiApiCatalogItemIdDeleteRequest {
+    readonly itemId: number
+
+    readonly restaurant?: number
+}
+
+/**
+ * Request parameters for apiCatalogItemIdGet operation in MenuApi.
+ */
+export interface MenuApiApiCatalogItemIdGetRequest {
+    readonly itemId: number
+
+    readonly restaurant?: number
+}
+
+/**
+ * Request parameters for apiCatalogItemIdPut operation in MenuApi.
+ */
+export interface MenuApiApiCatalogItemIdPutRequest {
+    readonly itemId: number
+
+    readonly restaurant?: number
+
+    readonly menuItems?: MenuItems
+}
+
+/**
+ * Request parameters for apiCatalogPost operation in MenuApi.
+ */
+export interface MenuApiApiCatalogPostRequest {
+    readonly restaurant?: number
+
+    readonly menuItems?: MenuItems
+}
 
 /**
  * MenuApi - object-oriented interface
@@ -634,90 +698,82 @@ export const MenuApiFactory = function (configuration?: Configuration, basePath?
 export class MenuApi extends BaseAPI {
     /**
      * 
-     * @param {number} [restaurantId] 
-     * @param {Array<MenuItems>} [menuItems] 
+     * @param {MenuApiApiCatalogBulkPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public apiCatalogBulkPost(restaurantId?: number, menuItems?: Array<MenuItems>, options?: RawAxiosRequestConfig) {
-        return MenuApiFp(this.configuration).apiCatalogBulkPost(restaurantId, menuItems, options).then((request) => request(this.axios, this.basePath));
+    public apiCatalogBulkPost(requestParameters: MenuApiApiCatalogBulkPostRequest = {}, options?: RawAxiosRequestConfig) {
+        return MenuApiFp(this.configuration).apiCatalogBulkPost(requestParameters.restaurantId, requestParameters.menuItems, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @param {number} [restaurantId] 
+     * @param {MenuApiApiCatalogDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public apiCatalogDelete(restaurantId?: number, options?: RawAxiosRequestConfig) {
-        return MenuApiFp(this.configuration).apiCatalogDelete(restaurantId, options).then((request) => request(this.axios, this.basePath));
+    public apiCatalogDelete(requestParameters: MenuApiApiCatalogDeleteRequest = {}, options?: RawAxiosRequestConfig) {
+        return MenuApiFp(this.configuration).apiCatalogDelete(requestParameters.restaurantId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @param {number} [restaurantId] 
+     * @param {MenuApiApiCatalogGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public apiCatalogGet(restaurantId?: number, options?: RawAxiosRequestConfig) {
-        return MenuApiFp(this.configuration).apiCatalogGet(restaurantId, options).then((request) => request(this.axios, this.basePath));
+    public apiCatalogGet(requestParameters: MenuApiApiCatalogGetRequest = {}, options?: RawAxiosRequestConfig) {
+        return MenuApiFp(this.configuration).apiCatalogGet(requestParameters.restaurantId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @param {number} itemId 
-     * @param {number} [restaurant] 
-     * @param {boolean} [body] 
+     * @param {MenuApiApiCatalogItemIdAvailabilityPutRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public apiCatalogItemIdAvailabilityPut(itemId: number, restaurant?: number, body?: boolean, options?: RawAxiosRequestConfig) {
-        return MenuApiFp(this.configuration).apiCatalogItemIdAvailabilityPut(itemId, restaurant, body, options).then((request) => request(this.axios, this.basePath));
+    public apiCatalogItemIdAvailabilityPut(requestParameters: MenuApiApiCatalogItemIdAvailabilityPutRequest, options?: RawAxiosRequestConfig) {
+        return MenuApiFp(this.configuration).apiCatalogItemIdAvailabilityPut(requestParameters.itemId, requestParameters.restaurant, requestParameters.body, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @param {number} itemId 
-     * @param {number} [restaurant] 
+     * @param {MenuApiApiCatalogItemIdDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public apiCatalogItemIdDelete(itemId: number, restaurant?: number, options?: RawAxiosRequestConfig) {
-        return MenuApiFp(this.configuration).apiCatalogItemIdDelete(itemId, restaurant, options).then((request) => request(this.axios, this.basePath));
+    public apiCatalogItemIdDelete(requestParameters: MenuApiApiCatalogItemIdDeleteRequest, options?: RawAxiosRequestConfig) {
+        return MenuApiFp(this.configuration).apiCatalogItemIdDelete(requestParameters.itemId, requestParameters.restaurant, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @param {number} itemId 
-     * @param {number} [restaurant] 
+     * @param {MenuApiApiCatalogItemIdGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public apiCatalogItemIdGet(itemId: number, restaurant?: number, options?: RawAxiosRequestConfig) {
-        return MenuApiFp(this.configuration).apiCatalogItemIdGet(itemId, restaurant, options).then((request) => request(this.axios, this.basePath));
+    public apiCatalogItemIdGet(requestParameters: MenuApiApiCatalogItemIdGetRequest, options?: RawAxiosRequestConfig) {
+        return MenuApiFp(this.configuration).apiCatalogItemIdGet(requestParameters.itemId, requestParameters.restaurant, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @param {number} itemId 
-     * @param {number} [restaurant] 
-     * @param {MenuItems} [menuItems] 
+     * @param {MenuApiApiCatalogItemIdPutRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public apiCatalogItemIdPut(itemId: number, restaurant?: number, menuItems?: MenuItems, options?: RawAxiosRequestConfig) {
-        return MenuApiFp(this.configuration).apiCatalogItemIdPut(itemId, restaurant, menuItems, options).then((request) => request(this.axios, this.basePath));
+    public apiCatalogItemIdPut(requestParameters: MenuApiApiCatalogItemIdPutRequest, options?: RawAxiosRequestConfig) {
+        return MenuApiFp(this.configuration).apiCatalogItemIdPut(requestParameters.itemId, requestParameters.restaurant, requestParameters.menuItems, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @param {number} [restaurant] 
-     * @param {MenuItems} [menuItems] 
+     * @param {MenuApiApiCatalogPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public apiCatalogPost(restaurant?: number, menuItems?: MenuItems, options?: RawAxiosRequestConfig) {
-        return MenuApiFp(this.configuration).apiCatalogPost(restaurant, menuItems, options).then((request) => request(this.axios, this.basePath));
+    public apiCatalogPost(requestParameters: MenuApiApiCatalogPostRequest = {}, options?: RawAxiosRequestConfig) {
+        return MenuApiFp(this.configuration).apiCatalogPost(requestParameters.restaurant, requestParameters.menuItems, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

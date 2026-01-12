@@ -1,9 +1,16 @@
-﻿namespace CatalogService.MockData;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace CatalogService.MockData;
 
 public class DataSeeder
 {
     public static async Task SeedAsync(CatalogDbContext dbContext)
     {
+        if (await dbContext.MenuItems.AnyAsync())
+        {
+            return; // Data already seeded
+        }
+        
         if (!dbContext.MenuItems.Any())
         {
             var items = new List<Models.MenuItems>
