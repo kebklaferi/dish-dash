@@ -1,6 +1,7 @@
 import express from "express";
 import type { Request, Response, NextFunction } from "express";
 import ordersRouter from "./routes/orders.routes.js";
+import logsRouter from "./routes/logs.routes.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
 import { console } from "inspector";
@@ -20,6 +21,7 @@ app.get("/openapi.json", (req: Request, res: Response) => {
 });
 
 app.use("/orders", ordersRouter);
+app.use("/logs", logsRouter);
 
 // Global error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

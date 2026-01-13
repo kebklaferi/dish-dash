@@ -2,6 +2,7 @@ import express from 'express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import paymentRoutes from './routes/paymentRoutes.js';
+import logsRoutes from './routes/logs.routes.js';
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/payments', paymentRoutes);
+app.use('/logs', logsRoutes);
 
 // 404 handler
 app.use((req, res) => {

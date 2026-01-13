@@ -1,6 +1,7 @@
 import app from "./app.js";
 import { rabbitMQ } from "./messaging/rabbitmq.js";
 import { messageConsumer } from "./messaging/consumer.js";
+import { logger } from "./utils/logger.js";
 
 const PORT = process.env.PORT || 3001;
 
@@ -8,6 +9,10 @@ async function startServer() {
   try {
     // Connect to RabbitMQ
     await rabbitMQ.connect();
+    
+    // Initialize logger with RabbitMQ channel
+    logger.setRabbitMQChannel(rabbitMQ.getChannel());
+    console.log('✅ Logger initialized with RabbitMQ channel');
     
     // Start consuming messages
     await messageConsumer.startConsumers();

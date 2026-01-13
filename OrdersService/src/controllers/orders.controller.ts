@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import ordersService from "../services/orders.service.js";
-import type { CreateOrderRequest, UpdateOrderRequest } from "../types/order.js";
+import type { CreateOrderRequest, UpdateOrderRequest, PaymentInfo } from "../types/order.js";
 import { messagePublisher } from "../messaging/publisher.js";
 
 export class OrdersController {
@@ -77,8 +77,8 @@ export class OrdersController {
         customerId: req.user!.id, // Use authenticated user's ID
       };
       
-      // Extract payment object if provided
-      const payment = req.body.payment;
+      // Extract payment object with type safety
+      const payment: PaymentInfo | undefined = req.body.payment;
 
       // Basic validation
       if (
@@ -94,37 +94,58 @@ export class OrdersController {
         return;
       }
       
-      // Validate payment details if provided
-      if (payment && payment.method !== 'CASH_ON_DELIVERY') {
+      // Validate payment is provided
+      if (!payment || !payment.method) {
+        res.status(400).json({
+          error: "Payment information is required. Please specify payment method: CREDIT_CARD or CASH_ON_DELIVERY",
+        });
+        return;
+      }
+
+      // Validate payment method
+      if (payment.method !== 'CREDIT_CARD' && payment.method !== 'CASH_ON_DELIVERY') {
+        res.status(400).json({
+          error: "Invalid payment method. Must be either CREDIT_CARD or CASH_ON_DELIVERY",
+        });
+        return;
+      }
+      
+      // Validate credit card details if payment method is CREDIT_CARD
+      if (payment.method === 'CREDIT_CARD') {
         if (!payment.cardNumber || !payment.expiryMonth || !payment.expiryYear || !payment.cvv || !payment.cardholderName) {
           res.status(400).json({
-            error: "Missing required payment fields for credit card payment",
+            error: "Missing required payment fields for credit card payment: cardNumber, expiryMonth, expiryYear, cvv, cardholderName",
           });
           return;
         }
       }
 
       // Create order with status 'pending' (waiting for payment)
-      const order = await ordersService.createOrder(orderData);
+      const order = await ordersService.createOrder({
+        ...orderData,
+        paymentMethod: payment.method,
+      });
       
       // If payment method requires processing, send to payment service
-      if (payment && payment.method !== 'CASH_ON_DELIVERY') {
+      if (payment.method === 'CREDIT_CARD') {
         // Send payment request to PaymentService via RabbitMQ
+        // Note: Card fields are validated above, so safe to use non-null assertions
         await messagePublisher.requestPaymentProcessing({
           orderId: order.id,
           amount: order.totalAmount,
           currency: 'EUR',
           paymentMethod: payment.method,
-          cardNumber: payment.cardNumber,
-          cardExpiry: `${payment.expiryMonth}/${payment.expiryYear}`,
-          cardCvv: payment.cvv,
-          cardholderName: payment.cardholderName,
+          cardNumber: payment.cardNumber!,
+          cardExpiry: `${payment.expiryMonth!}/${payment.expiryYear!}`,
+          cardCvv: payment.cvv!,
+          cardholderName: payment.cardholderName!,
         });
         
         console.log(`💳 Payment request sent for order ${order.id}`);
       } else {
-        // Cash on delivery or no payment - mark as confirmed immediately
+        // Cash on delivery - mark as confirmed immediately
         await ordersService.updateOrderStatus(order.id, 'confirmed');
+        console.log(`💵 Cash on delivery order ${order.id} confirmed`);
       }
 
       res.status(201).json(order);

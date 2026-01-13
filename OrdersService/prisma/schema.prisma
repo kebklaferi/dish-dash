@@ -21,6 +21,7 @@ model Order {
   totalAmount     Float
   status          String      @default("pending")
   deliveryFee     Float       @default(5.99)
+  paymentMethod   String      // CREDIT_CARD or CASH_ON_DELIVERY
   notes           String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -44,4 +45,22 @@ model OrderItem {
 
   @@index([orderId])
   @@map("order_items")
+}
+
+model OrderLog {
+  id            String   @id @default(uuid())
+  timestamp     DateTime
+  level         String   // Info, Error, Warn
+  service       String
+  correlationId String
+  url           String
+  message       String
+  errorMessage  String?
+  errorStack    String?
+  createdAt     DateTime @default(now())
+
+  @@index([timestamp])
+  @@index([level])
+  @@index([correlationId])
+  @@map("order_logs")
 }
