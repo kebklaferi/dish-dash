@@ -84,6 +84,12 @@ const options: swaggerJsdoc.Options = {
               format: "float",
               example: 5.99,
             },
+            paymentMethod: {
+              type: "string",
+              enum: ["CREDIT_CARD", "CASH_ON_DELIVERY"],
+              example: "CREDIT_CARD",
+              description: "Payment method used for this order"
+            },
             notes: {
               type: "string",
               example: "Please ring the doorbell",
@@ -132,6 +138,97 @@ const options: swaggerJsdoc.Options = {
               example: "Extra cheese, no olives",
             },
           },
+        },
+        Payment: {
+          type: "object",
+          required: ["method"],
+          properties: {
+            method: {
+              type: "string",
+              enum: ["CREDIT_CARD", "CASH_ON_DELIVERY"],
+              example: "CREDIT_CARD",
+              description: "Payment method - CREDIT_CARD triggers payment processing via RabbitMQ"
+            },
+            cardNumber: {
+              type: "string",
+              example: "4242424242424242",
+              description: "Required for CREDIT_CARD payments - 16 digits"
+            },
+            expiryMonth: {
+              type: "string",
+              example: "12",
+              description: "Required for CREDIT_CARD payments - MM format"
+            },
+            expiryYear: {
+              type: "string",
+              example: "25",
+              description: "Required for CREDIT_CARD payments - YY format"
+            },
+            cvv: {
+              type: "string",
+              example: "123",
+              description: "Required for CREDIT_CARD payments - 3 or 4 digits"
+            },
+            cardholderName: {
+              type: "string",
+              example: "John Doe",
+              description: "Required for CREDIT_CARD payments"
+            }
+          }
+        },
+        CreateOrderRequest: {
+          type: "object",
+          required: ["restaurantId", "deliveryAddress", "items", "payment"],
+          properties: {
+            restaurantId: {
+              type: "string",
+              example: "1",
+              description: "ID of the restaurant"
+            },
+            deliveryAddress: {
+              type: "string",
+              example: "123 Main St, Apt 4B",
+              description: "Full delivery address"
+            },
+            items: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["menuItemId", "quantity"],
+                properties: {
+                  menuItemId: {
+                    type: "string",
+                    example: "1"
+                  },
+                  quantity: {
+                    type: "integer",
+                    minimum: 1,
+                    example: 2
+                  },
+                  specialInstructions: {
+                    type: "string",
+                    example: "Extra cheese, no onions"
+                  }
+                }
+              },
+              minItems: 1
+            },
+            deliveryFee: {
+              type: "number",
+              format: "float",
+              example: 5.99,
+              description: "Delivery fee amount"
+            },
+            notes: {
+              type: "string",
+              example: "Please ring the doorbell",
+              description: "Additional order notes"
+            },
+            payment: {
+              $ref: "#/components/schemas/Payment",
+              description: "Payment details (required). If method is CASH_ON_DELIVERY, only method field is needed. If method is CREDIT_CARD, card details are required and order is sent to PaymentService via RabbitMQ."
+            }
+          }
         },
       },
     },

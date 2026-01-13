@@ -58,3 +58,21 @@ model PaymentHistory {
   @@index([paymentId])
   @@index([createdAt])
 }
+
+model PaymentLog {
+  id            String   @id @default(uuid())
+  timestamp     DateTime
+  level         String   // Info, Error, Warn
+  service       String
+  correlationId String
+  url           String
+  message       String
+  errorMessage  String?
+  errorStack    String?
+  createdAt     DateTime @default(now())
+
+  @@index([timestamp])
+  @@index([level])
+  @@index([correlationId])
+  @@map("payment_logs")
+}

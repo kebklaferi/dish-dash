@@ -111,7 +111,9 @@ export class OrdersService {
       // Validate and enrich menu items
       console.log('[OrdersService] Validating and enriching order items...');
       const enrichedItems = data.items.map((item, index) => {
-        const menuItem = catalogItems.find((m) => m.id === item.menuItemId);
+        // Convert menuItemId to number for comparison since catalog returns numeric IDs
+        const menuItemId = typeof item.menuItemId === 'string' ? parseInt(item.menuItemId, 10) : item.menuItemId;
+        const menuItem = catalogItems.find((m) => m.id === menuItemId);
         
         if (!menuItem) {
           console.error(`[OrdersService] Menu item ${item.menuItemId} not found`);
@@ -155,6 +157,7 @@ export class OrdersService {
           deliveryAddress: data.deliveryAddress,
           totalAmount,
           deliveryFee,
+          paymentMethod: data.paymentMethod,
           notes: data.notes ?? null,
           status: "pending",
           items: {

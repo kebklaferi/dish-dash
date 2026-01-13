@@ -76,50 +76,52 @@ router.get("/:id", ordersController.getOrderById.bind(ordersController));
  *     tags:
  *       - Orders
  *     summary: Create a new order
- *     description: Create a new food delivery order. Menu item details (name, price) are automatically fetched from CatalogService.
+ *     description: |
+ *       Create a new food delivery order. Menu item details (name, price) are automatically fetched from CatalogService.
+ *       
+ *       **Payment Processing (Required):**
+ *       - If `payment.method` is `CREDIT_CARD`: Order is sent to PaymentService via RabbitMQ for processing. Order status will be updated based on payment result.
+ *       - If `payment.method` is `CASH_ON_DELIVERY`: Order is confirmed immediately without payment processing.
+ *       
+ *       **Note:** Payment information is mandatory. You must specify either CREDIT_CARD or CASH_ON_DELIVERY.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - restaurantId
- *               - deliveryAddress
- *               - items
- *             properties:
- *               restaurantId:
- *                 type: integer
- *                 example: 1
- *               deliveryAddress:
- *                 type: string
- *                 example: 123 Main St, Apt 4B
- *               items:
- *                 type: array
- *                 minItems: 1
+ *             $ref: '#/components/schemas/CreateOrderRequest'
+ *           examples:
+ *             creditCard:
+ *               summary: Order with credit card payment
+ *               value:
+ *                 restaurantId: "1"
+ *                 deliveryAddress: "123 Main St, Apt 4B"
  *                 items:
- *                   type: object
- *                   required:
- *                     - menuItemId
- *                     - quantity
- *                   properties:
- *                     menuItemId:
- *                       type: integer
- *                       example: 1
- *                     quantity:
- *                       type: integer
- *                       minimum: 1
- *                       example: 2
- *                     specialInstructions:
- *                       type: string
- *                       example: Extra cheese, no onions
- *               deliveryFee:
- *                 type: number
- *                 format: float
- *                 example: 5.99
- *               notes:
- *                 type: string
- *                 example: Please ring the doorbell
+ *                   - menuItemId: "1"
+ *                     quantity: 2
+ *                     specialInstructions: "Extra cheese, no onions"
+ *                 deliveryFee: 5.99
+ *                 notes: "Please ring the doorbell"
+ *                 payment:
+ *                   method: "CREDIT_CARD"
+ *                   cardNumber: "4242424242424242"
+ *                   expiryMonth: "12"
+ *                   expiryYear: "25"
+ *                   cvv: "123"
+ *                   cardholderName: "John Doe"
+ *             cashOnDelivery:
+ *               summary: Order with cash on delivery
+ *               value:
+ *                 restaurantId: "1"
+ *                 deliveryAddress: "123 Main St, Apt 4B"
+ *                 items:
+ *                   - menuItemId: "1"
+ *                     quantity: 2
+ *                     specialInstructions: "No onions please"
+ *                 deliveryFee: 5.99
+ *                 notes: "Call when you arrive"
+ *                 payment:
+ *                   method: "CASH_ON_DELIVERY"
  *     responses:
  *       201:
  *         description: Order created successfully
@@ -128,7 +130,7 @@ router.get("/:id", ordersController.getOrderById.bind(ordersController));
  *             schema:
  *               $ref: '#/components/schemas/Order'
  *       400:
- *         description: Invalid request - missing required fields or invalid menu items
+ *         description: Invalid request - missing required fields, invalid menu items, or missing/invalid payment information
  *       500:
  *         description: Internal server error
  */

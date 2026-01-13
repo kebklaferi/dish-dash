@@ -6,6 +6,17 @@ export type OrderStatus =
   | "delivered"
   | "cancelled";
 
+export type PaymentMethod = "CREDIT_CARD" | "CASH_ON_DELIVERY";
+
+export interface PaymentInfo {
+  method: PaymentMethod;
+  cardNumber?: string;
+  expiryMonth?: string;
+  expiryYear?: string;
+  cvv?: string;
+  cardholderName?: string;
+}
+
 export interface OrderItem {
   menuItemId: string;
   quantity: number;
@@ -20,6 +31,7 @@ export interface Order {
   totalAmount: number;
   status: OrderStatus;
   deliveryFee: number;
+  paymentMethod: PaymentMethod;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -35,12 +47,7 @@ export interface CreateOrderRequest {
   }[];
   deliveryFee?: number;
   notes?: string;
-  // Payment details
-  paymentMethod?: string;
-  cardNumber?: string;
-  cardExpiry?: string;
-  cardCvv?: string;
-  cardholderName?: string;
+  paymentMethod: PaymentMethod;
 }
 
 export interface UpdateOrderRequest {

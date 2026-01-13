@@ -1,4 +1,5 @@
 import amqp from "amqplib";
+import { EXCHANGES, QUEUES, LOG_ROUTING_KEYS } from "./types.js";
 
 /**
  * RabbitMQ Connection Manager
@@ -30,6 +31,9 @@ class RabbitMQConnection {
       
       console.log("✅ Connected to RabbitMQ");
 
+      // Set up exchanges and queues
+      await this.setupInfrastructure();
+
       // Handle connection events
       this.connection.on("error", (err: Error) => {
         console.error("❌ RabbitMQ connection error:", err.message);
@@ -44,6 +48,37 @@ class RabbitMQConnection {
     } catch (error) {
       console.error("❌ Failed to connect to RabbitMQ:", error);
       this.handleDisconnect();
+    }
+  }
+
+  /**
+   * Set up exchanges, queues, and bindings
+   */
+  private async setupInfrastructure(): Promise<void> {
+    try {
+      // Create logs exchange (topic exchange for routing logs by service and level)
+      await this.channel.assertExchange(EXCHANGES.LOGS, 'topic', {
+        durable: true, // Exchange survives RabbitMQ restarts
+      });
+      console.log(`📊 Created/verified exchange: ${EXCHANGES.LOGS}`);
+
+      // Create centralized logs queue
+      await this.channel.assertQueue(QUEUES.LOGS, {
+        durable: true, // Queue survives RabbitMQ restarts
+      });
+      console.log(`📥 Created/verified queue: ${QUEUES.LOGS}`);
+
+      // Bind logs queue to logs exchange (subscribe to all logs)
+      await this.channel.bindQueue(
+        QUEUES.LOGS,
+        EXCHANGES.LOGS,
+        LOG_ROUTING_KEYS.ALL // '#' wildcard matches all routing keys
+      );
+      console.log(`🔗 Bound ${QUEUES.LOGS} to ${EXCHANGES.LOGS} with pattern: ${LOG_ROUTING_KEYS.ALL}`);
+
+    } catch (error) {
+      console.error("❌ Failed to set up RabbitMQ infrastructure:", error);
+      throw error;
     }
   }
 
