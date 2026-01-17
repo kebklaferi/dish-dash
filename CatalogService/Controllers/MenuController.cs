@@ -15,16 +15,26 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Models.MenuItems>>> GetMenuItems([FromQuery(Name = "restaurantId")] int restaurantId)
+    public async Task<ActionResult<List<Models.MenuItemDto>>> GetMenuItems([FromQuery(Name = "restaurantId")] int restaurantId)
     {
-        var item = await _dbContext.MenuItems
+        var items = await _dbContext.MenuItems
             .Where(i => i.restaurant_id == restaurantId && i.available)
             .ToListAsync();
-        return Ok(item);
+            
+        var dtos = items.Select(item => new Models.MenuItemDto
+        {
+            item_name = item.item_name,
+            price_cents = item.price_cents,
+            available = item.available,
+            description = item.description,
+            tags = item.tags
+        }).ToList();
+        
+        return Ok(dtos);
     }
 
     [HttpGet("{itemId:int}")]
-    public async Task<ActionResult<Models.MenuItems>> GetMenuItem(int restaurant, int itemId)
+    public async Task<ActionResult<Models.MenuItemDto>> GetMenuItem(int restaurant, int itemId)
     {
         var item = await _dbContext.MenuItems
             .FirstOrDefaultAsync(i => i.restaurant_id == restaurant && i.id == itemId && i.available);
@@ -34,20 +44,39 @@ public class MenuController : ControllerBase
             return NotFound();
         }
         
-        return Ok(item);
+        var dto = new Models.MenuItemDto
+        {
+            item_name = item.item_name,
+            price_cents = item.price_cents,
+            available = item.available,
+            description = item.description,
+            tags = item.tags
+        };
+        
+        return Ok(dto);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Models.MenuItems>> AddMenuItem(int restaurant, [FromBody] Models.MenuItems menuItem)
+    public async Task<ActionResult<Models.MenuItemDto>> AddMenuItem(int restaurant, [FromBody] Models.MenuItems menuItem)
     {
         menuItem.restaurant_id = restaurant;
         _dbContext.MenuItems.Add(menuItem);
         await _dbContext.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetMenuItem), new { resturant = restaurant, itemId = menuItem.id }, menuItem);
+        
+        var dto = new Models.MenuItemDto
+        {
+            item_name = menuItem.item_name,
+            price_cents = menuItem.price_cents,
+            available = menuItem.available,
+            description = menuItem.description,
+            tags = menuItem.tags
+        };
+        
+        return CreatedAtAction(nameof(GetMenuItem), new { resturant = restaurant, itemId = menuItem.id }, dto);
     }
 
     [HttpPost("bulk")]
-    public async Task<ActionResult<List<Models.MenuItems>>> CreateItemsBulk(int restaurantId, [FromBody] List<Models.MenuItems> menuItems)
+    public async Task<ActionResult<List<Models.MenuItemDto>>> CreateItemsBulk(int restaurantId, [FromBody] List<Models.MenuItems> menuItems)
     {
         foreach (var item in menuItems)
         {
@@ -56,7 +85,17 @@ public class MenuController : ControllerBase
 
         await _dbContext.MenuItems.AddRangeAsync(menuItems);
         await _dbContext.SaveChangesAsync();
-        return Ok(menuItems);
+        
+        var dtos = menuItems.Select(item => new Models.MenuItemDto
+        {
+            item_name = item.item_name,
+            price_cents = item.price_cents,
+            available = item.available,
+            description = item.description,
+            tags = item.tags
+        }).ToList();
+        
+        return Ok(dtos);
     }
     
     [HttpPut("{itemId:int}")]
@@ -82,7 +121,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPut("{itemId:int}/availability")]
-    public async Task<IActionResult> UpdateMenuItemAvailability(int restaurant, int itemId, [FromBody] bool availability)
+    public async Task<ActionResult<Models.MenuItemDto>> UpdateMenuItemAvailability(int restaurant, int itemId, [FromBody] bool availability)
     {
         var existingItem = await _dbContext.MenuItems
             .FirstOrDefaultAsync(i => i.restaurant_id == restaurant && i.id == itemId);
@@ -96,7 +135,16 @@ public class MenuController : ControllerBase
 
         Console.WriteLine($"Event: ItemAvailabilityUpdated {existingItem.id} to {availability}");
 
-        return Ok(existingItem);
+        var dto = new Models.MenuItemDto
+        {
+            item_name = existingItem.item_name,
+            price_cents = existingItem.price_cents,
+            available = existingItem.available,
+            description = existingItem.description,
+            tags = existingItem.tags
+        };
+
+        return Ok(dto);
     }
 
     [HttpDelete("{itemId:int}")]
