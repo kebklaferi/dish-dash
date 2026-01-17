@@ -1,5 +1,4 @@
-﻿using DeliveryService.Client;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DeliveryService.Controllers;
@@ -10,12 +9,10 @@ public class DeliveriesController : ControllerBase
 {
     private readonly DeliveryDbContext _context;
     private readonly ILogger<DeliveriesController> _logger;
-    private readonly NotificationClient _notificationClient;
 
-    public DeliveriesController(DeliveryDbContext context, NotificationClient notificationClient, ILogger<DeliveriesController> logger)
+    public DeliveriesController(DeliveryDbContext context, ILogger<DeliveriesController> logger)
     {
         _context = context;
-        _notificationClient = notificationClient;
         _logger = logger;
         
     }
@@ -50,13 +47,7 @@ public class DeliveriesController : ControllerBase
         driver.occupied = true;
         _context.Deliveries.Add(delivery);
         await _context.SaveChangesAsync();
-
-        await _notificationClient.SendDeliveryNotificationAsync(
-            userId: $"order_{assignDelivery.order_id}",
-            title: "Delivery Assigned",
-            message: $"Your delivery has been assigned to driver {driver.name}. Expected delivery: {delivery.delivery_date:HH:mm}",
-            type: "delivery",
-            priority: "medium");
+        
         
         return Ok(delivery);
     }
@@ -81,15 +72,6 @@ public class DeliveriesController : ControllerBase
             "Cancelled" => "Your delivery has been cancelled.",
             _ => $"Delivery status updated to: {status}"
         };
-
-        await _notificationClient.SendDeliveryNotificationAsync(
-            userId: $"order_{delivery.order_id}",
-            title: $"Delivery Update: {status}",
-            message: notificationMessage,
-            type: "delivery",
-            priority: status == "Delivered" ? "high" : "medium"
-        );
-        
         
         return Ok(delivery);
     }

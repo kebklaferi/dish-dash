@@ -1,5 +1,4 @@
 using DeliveryService;
-using DeliveryService.Client;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,13 +15,6 @@ builder.Services.AddDbContext<DeliveryDbContext>(options =>
             maxRetryDelay: TimeSpan.FromSeconds(10),
             errorCodesToAdd: null
         )));
-builder.Services.AddHttpClient<NotificationClient>(client =>
-{
-    var notificationServiceUrl = builder.Configuration["NotificationService:BaseUrl"] 
-                                 ?? "http://notificationservice:3004";
-    client.BaseAddress = new Uri(notificationServiceUrl);
-    client.Timeout = TimeSpan.FromSeconds(10);
-});
 
 var app = builder.Build();
 

@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Clawfoot.Extensions.Newtonsoft" Version="0.1.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.*">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
@@ -16,6 +17,10 @@
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.*" />
+        <PackageReference Include="NSwag.MSBuild" Version="14.6.3">
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     </ItemGroup>
 
@@ -24,4 +29,13 @@
         <Link>.dockerignore</Link>
       </Content>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Clients\" />
+    </ItemGroup>
+
+    <Target Name="NSwag" Condition="'$(RunNSwag)'" BeforeTargets="Build">
+        <Exec Command="$(NSwagExe) run nswag.json" />
+    </Target>
+    
 </Project>
