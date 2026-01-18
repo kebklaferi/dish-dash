@@ -7,8 +7,8 @@ COPY ["DeliveryService/DeliveryService.csproj", "DeliveryService/"]
 RUN dotnet restore "DeliveryService/DeliveryService.csproj"
 COPY . .
 WORKDIR "/src/DeliveryService"
-RUN dotnet build "./DeliveryService.csproj" -c $BUILD_CONFIGURATION -o /app/build
-RUN dotnet publish "./DeliveryService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet build "./DeliveryService.csproj" -c $BUILD_CONFIGURATION -o /app/build /p:RunNSwag=false
+RUN dotnet publish "./DeliveryService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false /p:RunNSwag=false
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final

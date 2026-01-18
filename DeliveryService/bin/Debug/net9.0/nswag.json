@@ -1,0 +1,18 @@
+﻿{
+  "runtime": "WinX64",
+  "documentGenerator": {
+    "fromDocument": {
+      "json": "./orderService.json"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "OrderServiceClient",
+      "namespace": "DeliveryService.Generated",
+      "generateClientInterfaces": true,
+      "generateDtoTypes": true,
+      "useBaseUrl": true,
+      "output": "Clients/Generated/OrderServiceClient.cs"
+    }
+  }
+}

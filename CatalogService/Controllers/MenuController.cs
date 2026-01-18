@@ -23,6 +23,7 @@ public class MenuController : ControllerBase
             
         var dtos = items.Select(item => new Models.MenuItemDto
         {
+            id = item.id,
             item_name = item.item_name,
             price_cents = item.price_cents,
             available = item.available,
@@ -46,6 +47,7 @@ public class MenuController : ControllerBase
         
         var dto = new Models.MenuItemDto
         {
+            id = item.id,
             item_name = item.item_name,
             price_cents = item.price_cents,
             available = item.available,
@@ -57,14 +59,25 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Models.MenuItemDto>> AddMenuItem(int restaurant, [FromBody] Models.MenuItems menuItem)
+    public async Task<ActionResult<Models.MenuItemDto2>> AddMenuItem(int restaurant, [FromBody] Models.MenuItemDto2 menuItemDto)
     {
-        menuItem.restaurant_id = restaurant;
+        
+        var menuItem = new Models.MenuItems
+        {
+            restaurant_id = restaurant,
+            item_name = menuItemDto.item_name,
+            price_cents = menuItemDto.price_cents,
+            available = menuItemDto.available,
+            description = menuItemDto.description,
+            tags = menuItemDto.tags
+        };
+        
         _dbContext.MenuItems.Add(menuItem);
         await _dbContext.SaveChangesAsync();
         
         var dto = new Models.MenuItemDto
         {
+            id = menuItem.id,
             item_name = menuItem.item_name,
             price_cents = menuItem.price_cents,
             available = menuItem.available,
@@ -76,17 +89,28 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost("bulk")]
-    public async Task<ActionResult<List<Models.MenuItemDto>>> CreateItemsBulk(int restaurantId, [FromBody] List<Models.MenuItems> menuItems)
+    public async Task<ActionResult<List<Models.MenuItemDto2>>> CreateItemsBulk(int restaurantId, [FromBody] List<Models.MenuItemDto2> menuItemDtos)
     {
+        
+        var menuItems = menuItemDtos.Select(dto => new Models.MenuItems
+        {
+            restaurant_id = restaurantId,
+            item_name = dto.item_name,
+            price_cents = dto.price_cents,
+            available = dto.available,
+            description = dto.description,
+            tags = dto.tags
+        }).ToList();
+        
+        await _dbContext.MenuItems.AddRangeAsync(menuItems);
+        await _dbContext.SaveChangesAsync();
+        
         foreach (var item in menuItems)
         {
             item.restaurant_id = restaurantId;
         }
-
-        await _dbContext.MenuItems.AddRangeAsync(menuItems);
-        await _dbContext.SaveChangesAsync();
         
-        var dtos = menuItems.Select(item => new Models.MenuItemDto
+        var dtos = menuItems.Select(item => new Models.MenuItemDto2
         {
             item_name = item.item_name,
             price_cents = item.price_cents,
@@ -99,7 +123,7 @@ public class MenuController : ControllerBase
     }
     
     [HttpPut("{itemId:int}")]
-    public async Task<IActionResult> UpdateMenuItem(int restaurant, int itemId, [FromBody] Models.MenuItems updatedItem)
+    public async Task<IActionResult> UpdateMenuItem(int restaurant, int itemId, [FromBody] Models.MenuItemDto2 updatedItem)
     {
         var existingItem = await _dbContext.MenuItems
             .FirstOrDefaultAsync(i => i.restaurant_id == restaurant && i.id == itemId);
@@ -112,6 +136,8 @@ public class MenuController : ControllerBase
         existingItem.item_name = updatedItem.item_name;
         existingItem.price_cents = updatedItem.price_cents;
         existingItem.available = updatedItem.available;
+        existingItem.description = updatedItem.description;
+        existingItem.tags = updatedItem.tags;
 
         await _dbContext.SaveChangesAsync();
         
@@ -137,6 +163,7 @@ public class MenuController : ControllerBase
 
         var dto = new Models.MenuItemDto
         {
+            id = existingItem.id,
             item_name = existingItem.item_name,
             price_cents = existingItem.price_cents,
             available = existingItem.available,

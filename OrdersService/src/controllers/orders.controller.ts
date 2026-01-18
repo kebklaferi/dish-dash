@@ -4,6 +4,24 @@ import type { CreateOrderRequest, UpdateOrderRequest, PaymentInfo } from "../typ
 import { messagePublisher } from "../messaging/publisher.js";
 
 export class OrdersController {
+
+  // GET /health - Health check endpoint
+  async health(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      res.status(200).json({ 
+        status: "healthy",
+        service: "OrdersService",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // GET /orders - Get all orders (user's own orders or all if admin)
   async getAllOrders(
     req: Request,
