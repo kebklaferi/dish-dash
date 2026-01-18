@@ -1,7 +1,9 @@
 using System.Text;
 using DeliveryService;
 using DeliveryService.Generated;
+using DeliveryService.Logging;
 using DeliveryService.Middleware;
+using DeliveryService.RabbitMQ;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -99,6 +101,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddHostedService<Worker>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthMiddleware>();
+builder.Services.AddSingleton<RabbitMqService>();
+builder.Services.AddScoped<CorrelationLogger>();
 
 builder.Services.AddDbContext<DeliveryDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DeliveryDatabase"),
@@ -141,6 +145,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "api/delivery/swagger";
 });
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

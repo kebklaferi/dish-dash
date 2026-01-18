@@ -1,5 +1,8 @@
 using CatalogService;
+using CatalogService.Logging;
+using CatalogService.Middleware;
 using CatalogService.MockData;
+using CatalogService.RabbitMQ;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +11,9 @@ builder.Services.AddControllers();
 builder.Services.AddHostedService<Worker>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<RabbitMqService>();
+builder.Services.AddScoped<CorrelationLogger>();
 
 builder.Services.AddDbContext<CatalogDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("CatalogDb"),
@@ -36,7 +42,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "api/catalog/swagger";
 });
 
-
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.MapControllers();
 app.MapGet("/api/catalog/health", () => Results.Ok(new { status = "Healthy" }))
    .WithName("GetHealth");
