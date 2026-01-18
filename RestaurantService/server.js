@@ -81,6 +81,28 @@ fastify.decorate('authenticate', async (request, reply) => {
 
 await setupRabbitMQ();
 
+const STATISTICS_SERVICE_URL = process.env.STATISTICS_SERVICE_URL || 'https://localhost:3006';
+
+// Funkcija za pošiljanje statistike
+async function sendStatistics(endpoint, method, statusCode, serviceName) {
+  try {
+    await fetch(`${STATISTICS_SERVICE_URL}/statistics`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        klicanaStoritev: `${method} ${endpoint}`,
+        serviceName: serviceName,
+        statusCode: statusCode,
+        timestamp: new Date()
+      })
+    });
+    console.log("poslano")
+  } catch (error) {
+    // Ne blokiraj zahtevka če statistika ne uspe
+    console.error('Failed to send statistics:', error.message);
+  }
+}
+
 // Logging middleware
 fastify.addHook('onRequest', async (request, reply) => {
   request.correlationId = request.headers['x-correlation-id'] || uuidv4();
@@ -93,6 +115,8 @@ fastify.addHook('onResponse', async (request, reply) => {
   const message = `Request completed with status ${reply.statusCode}`;
   
   logToRabbitMQ(logLevel, url, request.correlationId, message);
+
+  sendStatistics(request.url, request.method, reply.statusCode, 'RestaurantService');
 });
 
 // MongoDB connection
