@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using DeliveryService.Models;
 
 namespace DeliveryService.Controllers;
 
@@ -26,8 +27,14 @@ public class DeliveriesController : ControllerBase
     }
     
     [HttpPost("driver")]
-    public async Task<IActionResult> AddDriver([FromBody] Models.Driver driver)
+    public async Task<IActionResult> AddDriver([FromBody] Models.DriverDto driverDto)
     {
+        var driver = new Models.Driver
+        {
+            name = driverDto.name,
+            occupied = false
+        };
+        
         _context.Drivers.Add(driver);
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetDriverStatus), new { driverId = driver.id }, driver);
@@ -190,26 +197,22 @@ public class DeliveriesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateDelivery(int id, [FromBody] Models.Delivery updatedDelivery)
+    public async Task<IActionResult> UpdateDelivery(int id, [FromBody] Models.DeliveryDto updatedDeliveryDto)
     {
-        if (id != updatedDelivery.id)
-        {
-            return BadRequest("Delivery ID mismatch");
-        }
-
-        var delivery = await _context.Deliveries.FindAsync(id);
-        if (delivery == null)
+        
+        var updatedDelivery = await _context.Deliveries.FindAsync(id);
+        if (updatedDelivery == null)
         {
             return NotFound("Delivery not found");
         }
 
-        delivery.addres = updatedDelivery.addres;
-        delivery.delivery_date = updatedDelivery.delivery_date;
-        delivery.status = updatedDelivery.status;
-        delivery.driver_id = updatedDelivery.driver_id;
+        updatedDelivery.addres = updatedDeliveryDto.addres;
+        updatedDelivery.delivery_date = updatedDeliveryDto.delivery_date;
+        updatedDelivery.status = updatedDeliveryDto.status;
+        updatedDelivery.driver_id = updatedDeliveryDto.driver_id;
 
         await _context.SaveChangesAsync();
-        return Ok(delivery);
+        return Ok(updatedDelivery);
     }
 
     [HttpPut("driver/{driverId}")]

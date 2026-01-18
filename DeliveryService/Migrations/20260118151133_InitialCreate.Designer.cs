@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DeliveryService.Migrations
 {
     [DbContext(typeof(DeliveryDbContext))]
-    [Migration("20260117162404_ChangeOrderIdToString")]
-    partial class ChangeOrderIdToString
+    [Migration("20260118151133_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
