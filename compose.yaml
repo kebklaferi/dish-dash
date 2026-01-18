@@ -224,6 +224,7 @@
       PORT: 3003
       MONGODB_URI: mongodb://mongodb:27017/restaurant_db
       JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
     expose:
       - "3003"
     depends_on:
@@ -244,6 +245,7 @@
       PORT: 3004
       MONGODB_URI: mongodb://mongodb-notifications:27017/notification_db
       JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
     expose:
       - "3004"
     depends_on:
@@ -343,6 +345,47 @@
         timeout: 5s
         retries: 5
       restart: unless-stopped
+
+  loggingservice:
+    image: loggingservice
+    container_name: logging_service
+    build:
+      context: ./LoggingService
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      MONGODB_URI: mongodb://mongodb-logs:27017/logging_db
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+    expose:
+      - "3005"
+    depends_on:
+      mongodb-logs:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - catalog-network
+    restart: unless-stopped
+
+  mongodb-logs:
+    image: mongo:7-jammy
+    container_name: logging-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: logging_db
+    expose:
+      - "27017"
+    volumes:
+      - mongodb_logs_data:/data/db
+    networks:
+      - catalog-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
       
 volumes:
     catalog_data:
@@ -353,6 +396,7 @@ volumes:
     mongodb_data:
     mongodb_notifications_data:
     rabbitmq_data:
+    mongodb_logs_data:
 
 networks:
   catalog-network:
