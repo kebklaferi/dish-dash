@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 import Notification from './models/Notification.js';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import fastifyJwt from '@fastify/jwt';
+import { v4 as uuidv4 } from 'uuid';
+import { setupRabbitMQ, logToRabbitMQ } from './logger.js';
 
 dotenv.config();
 
@@ -25,7 +28,17 @@ await fastify.register(swagger, {
     ],
     tags: [
       { name: 'notifications', description: 'Operacije za obvestila' }
-    ]
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'Enter JWT token obtained from /api/identity/auth/login'
+        }
+      }
+    }
   }
 });
 
@@ -37,6 +50,45 @@ await fastify.register(swaggerUi, {
   },
   staticCSP: true,
   transformStaticCSP: (header) => header
+});
+
+// JWT Authentication
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+
+await fastify.register(fastifyJwt, {
+  secret: process.env.JWT_SECRET
+});
+
+// Authentication decorator
+fastify.decorate('authenticate', async (request, reply) => {
+  try {
+    await request.jwtVerify();
+  } catch (err) {
+    const message = err.message === 'jwt expired' ? 'Token expired' : 'Invalid token';
+    reply.status(401).send({ 
+      success: false,
+      message: message
+    });
+  }
+});
+
+// Po JWT setup, pred MongoDB connection
+await setupRabbitMQ();
+
+// Logging middleware
+fastify.addHook('onRequest', async (request, reply) => {
+  request.correlationId = request.headers['x-correlation-id'] || uuidv4();
+  reply.header('x-correlation-id', request.correlationId);
+});
+
+fastify.addHook('onResponse', async (request, reply) => {
+  const logLevel = reply.statusCode >= 400 ? 'ERROR' : 'INFO';
+  const url = `${request.method} ${request.url}`;
+  const message = `Request completed with status ${reply.statusCode}`;
+  
+  logToRabbitMQ(logLevel, url, request.correlationId, message);
 });
 
 // MongoDB connection
@@ -256,11 +308,13 @@ fastify.post('/notifications/send', {
   }
 });
 
-// POST /notifications/bulk - pošlje več obvestil naenkrat
+// POST /notifications/bulk - pošlji več obvestil naenkrat
 fastify.post('/notifications/bulk', {
+  preHandler: [fastify.authenticate],
   schema: {
-    description: 'Pošlje več obvestil naenkrat',
+    description: 'Pošlji več obvestil naenkrat',
     tags: ['notifications'],
+    security: [{ bearerAuth: [] }],
     body: {
       type: 'object',
       required: ['notifications'],
@@ -326,9 +380,11 @@ fastify.post('/notifications/bulk', {
 
 // PUT /notifications/:id/read - označi obvestilo kot prebrano
 fastify.put('/notifications/:id/read', {
+  preHandler: [fastify.authenticate],
   schema: {
     description: 'Označi obvestilo kot prebrano',
     tags: ['notifications'],
+    security: [{ bearerAuth: [] }],
     params: {
       type: 'object',
       properties: {
@@ -391,9 +447,11 @@ fastify.put('/notifications/:id/read', {
 
 // PUT /notifications/:id - posodobi obvestilo
 fastify.put('/notifications/:id', {
+  preHandler: [fastify.authenticate],
   schema: {
     description: 'Posodobi obvestilo',
     tags: ['notifications'],
+    security: [{ bearerAuth: [] }],
     params: {
       type: 'object',
       properties: {
@@ -461,11 +519,13 @@ fastify.put('/notifications/:id', {
   }
 });
 
-// DELETE /notifications/:id - izbriše obvestilo
+// DELETE /notifications/:id - izbriši obvestilo
 fastify.delete('/notifications/:id', {
+  preHandler: [fastify.authenticate],
   schema: {
-    description: 'Izbriše obvestilo',
+    description: 'Izbriši obvestilo',
     tags: ['notifications'],
+    security: [{ bearerAuth: [] }],
     params: {
       type: 'object',
       properties: {
@@ -520,9 +580,11 @@ fastify.delete('/notifications/:id', {
 
 // DELETE /notifications/user/:userId - izbriše vsa obvestila uporabnika
 fastify.delete('/notifications/user/:userId', {
+  preHandler: [fastify.authenticate],
   schema: {
     description: 'Izbriše vsa obvestila uporabnika (potrebna potrditev)',
     tags: ['notifications'],
+    security: [{ bearerAuth: [] }],
     params: {
       type: 'object',
       properties: {
