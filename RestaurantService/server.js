@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import Restaurant from './models/Restaurant.js';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import fastifyJwt from '@fastify/jwt';
 
 dotenv.config();
 
@@ -29,7 +30,17 @@ await fastify.register(swagger, {
     ],
     tags: [
       { name: 'restaurants', description: 'Operacije za restavracije' }
-    ] 
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'Enter JWT token obtained from /api/identity/auth/login'
+        }
+      }
+    }
   }
 });
 
@@ -41,6 +52,28 @@ await fastify.register(swaggerUi, {
   },
   staticCSP: true,
   transformStaticCSP: (header) => header
+});
+
+// JWT Authentication
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+
+await fastify.register(fastifyJwt, {
+  secret: process.env.JWT_SECRET
+});
+
+// Authentication decorator
+fastify.decorate('authenticate', async (request, reply) => {
+  try {
+    await request.jwtVerify();
+  } catch (err) {
+    const message = err.message === 'jwt expired' ? 'Token expired' : 'Invalid token';
+    reply.status(401).send({ 
+      success: false,
+      message: message
+    });
+  }
 });
 
 // MongoDB connection
@@ -208,9 +241,11 @@ fastify.get('/restaurants/:id', {
 
 // POST /restaurants - doda novo restavracijo
 fastify.post('/restaurants', {
+  preHandler: [fastify.authenticate],
   schema: {
     description: 'Ustvari novo restavracijo',
     tags: ['restaurants'],
+    security: [{ bearerAuth: [] }],
     body: {
       type: 'object',
       required: ['name', 'address', 'workingHours', 'description'],
@@ -282,9 +317,11 @@ fastify.post('/restaurants', {
 
 // POST /restaurants/bulk - doda več restavracij naenkrat
 fastify.post('/restaurants/bulk', {
+  preHandler: [fastify.authenticate],
   schema: {
     description: 'Ustvari več restavracij naenkrat',
     tags: ['restaurants'],
+    security: [{ bearerAuth: [] }],
     body: {
       type: 'object',
       required: ['restaurants'],
@@ -350,9 +387,11 @@ fastify.post('/restaurants/bulk', {
 
 // PUT /restaurants/:id - posodobi podatke o restavraciji
 fastify.put('/restaurants/:id', {
+  preHandler: [fastify.authenticate],
   schema: {
     description: 'Posodobi podatke o restavraciji',
     tags: ['restaurants'],
+    security: [{ bearerAuth: [] }],
     params: {
       type: 'object',
       properties: {
@@ -428,9 +467,11 @@ fastify.put('/restaurants/:id', {
 
 // PUT /restaurants/:id/status - posodobi status restavracije (aktivna/neaktivna)
 fastify.put('/restaurants/:id/status', {
+  preHandler: [fastify.authenticate],
   schema: {
     description: 'Posodobi status restavracije (aktivna/neaktivna)',
     tags: ['restaurants'],
+    security: [{ bearerAuth: [] }],
     params: {
       type: 'object',
       properties: {
@@ -504,9 +545,11 @@ fastify.put('/restaurants/:id/status', {
 
 // DELETE /restaurants/:id - izbriše restavracijo
 fastify.delete('/restaurants/:id', {
+  preHandler: [fastify.authenticate],
   schema: {
     description: 'Izbriše restavracijo',
     tags: ['restaurants'],
+    security: [{ bearerAuth: [] }],
     params: {
       type: 'object',
       properties: {
@@ -561,9 +604,11 @@ fastify.delete('/restaurants/:id', {
 
 // DELETE /restaurants - izbriše vse restavracije (z opcionalnim filtrom)
 fastify.delete('/restaurants', {
+  preHandler: [fastify.authenticate],
   schema: {
     description: 'Izbriše vse restavracije (potrebna potrditev)',
     tags: ['restaurants'],
+    security: [{ bearerAuth: [] }],
     querystring: {
       type: 'object',
       required: ['confirm'],

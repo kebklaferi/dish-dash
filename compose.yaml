@@ -223,6 +223,7 @@
       NODE_ENV: production
       PORT: 3003
       MONGODB_URI: mongodb://mongodb:27017/restaurant_db
+      JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
     expose:
       - "3003"
     depends_on:
@@ -242,6 +243,7 @@
       NODE_ENV: production
       PORT: 3004
       MONGODB_URI: mongodb://mongodb-notifications:27017/notification_db
+      JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
     expose:
       - "3004"
     depends_on:
