@@ -215,6 +215,7 @@
       MONGODB_URI: mongodb://mongodb:27017/restaurant_db
       JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
       RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      STATISTICS_SERVICE_URL: https://statistics-service-9lf6.onrender.com
     expose:
       - "3003"
     depends_on:
@@ -236,6 +237,7 @@
       MONGODB_URI: mongodb://mongodb-notifications:27017/notification_db
       JWT_SECRET: ${IDENTITY_SERVICE_JWT_SECRET}
       RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      STATISTICS_SERVICE_URL: https://statistics-service-9lf6.onrender.com
     expose:
       - "3004"
     depends_on:
