@@ -1,0 +1,20 @@
+{
+  "name": "logging-service",
+  "version": "1.0.0",
+  "description": "Logging Service for DishDash - consumes logs from RabbitMQ",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["logging", "rabbitmq", "microservices"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.9",
+    "dotenv": "^16.3.1",
+    "fastify": "^5.6.2",
+    "mongoose": "^8.0.0"
+  }
+}

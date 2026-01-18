@@ -5,6 +5,8 @@ import Notification from './models/Notification.js';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import fastifyJwt from '@fastify/jwt';
+import { v4 as uuidv4 } from 'uuid';
+import { setupRabbitMQ, logToRabbitMQ } from './logger.js';
 
 dotenv.config();
 
@@ -70,6 +72,23 @@ fastify.decorate('authenticate', async (request, reply) => {
       message: message
     });
   }
+});
+
+// Po JWT setup, pred MongoDB connection
+await setupRabbitMQ();
+
+// Logging middleware
+fastify.addHook('onRequest', async (request, reply) => {
+  request.correlationId = request.headers['x-correlation-id'] || uuidv4();
+  reply.header('x-correlation-id', request.correlationId);
+});
+
+fastify.addHook('onResponse', async (request, reply) => {
+  const logLevel = reply.statusCode >= 400 ? 'ERROR' : 'INFO';
+  const url = `${request.method} ${request.url}`;
+  const message = `Request completed with status ${reply.statusCode}`;
+  
+  logToRabbitMQ(logLevel, url, request.correlationId, message);
 });
 
 // MongoDB connection
