@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DeliveryService.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class ChangeOrderIdToString : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,31 +16,31 @@ namespace DeliveryService.Migrations
                 name: "Deliveries",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    OrderId = table.Column<int>(type: "integer", nullable: false),
-                    Address = table.Column<string>(type: "text", nullable: false),
-                    DeliveryDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    DriverId = table.Column<int>(type: "integer", nullable: true)
+                    order_id = table.Column<string>(type: "text", nullable: false),
+                    addres = table.Column<string>(type: "text", nullable: false),
+                    delivery_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    status = table.Column<string>(type: "text", nullable: false),
+                    driver_id = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Deliveries", x => x.Id);
+                    table.PrimaryKey("PK_Deliveries", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Drivers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Occupied = table.Column<bool>(type: "boolean", nullable: false)
+                    name = table.Column<string>(type: "text", nullable: false),
+                    occupied = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Drivers", x => x.Id);
+                    table.PrimaryKey("PK_Drivers", x => x.id);
                 });
         }
 

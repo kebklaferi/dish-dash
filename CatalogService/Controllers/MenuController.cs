@@ -23,6 +23,7 @@ public class MenuController : ControllerBase
             
         var dtos = items.Select(item => new Models.MenuItemDto
         {
+            id = item.id,
             item_name = item.item_name,
             price_cents = item.price_cents,
             available = item.available,
@@ -46,6 +47,7 @@ public class MenuController : ControllerBase
         
         var dto = new Models.MenuItemDto
         {
+            id = item.id,
             item_name = item.item_name,
             price_cents = item.price_cents,
             available = item.available,
@@ -57,13 +59,13 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Models.MenuItemDto>> AddMenuItem(int restaurant, [FromBody] Models.MenuItems menuItem)
+    public async Task<ActionResult<Models.MenuItemDto2>> AddMenuItem(int restaurant, [FromBody] Models.MenuItems menuItem)
     {
         menuItem.restaurant_id = restaurant;
         _dbContext.MenuItems.Add(menuItem);
         await _dbContext.SaveChangesAsync();
         
-        var dto = new Models.MenuItemDto
+        var dto = new Models.MenuItemDto2
         {
             item_name = menuItem.item_name,
             price_cents = menuItem.price_cents,
@@ -76,7 +78,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost("bulk")]
-    public async Task<ActionResult<List<Models.MenuItemDto>>> CreateItemsBulk(int restaurantId, [FromBody] List<Models.MenuItems> menuItems)
+    public async Task<ActionResult<List<Models.MenuItemDto2>>> CreateItemsBulk(int restaurantId, [FromBody] List<Models.MenuItems> menuItems)
     {
         foreach (var item in menuItems)
         {
@@ -86,7 +88,7 @@ public class MenuController : ControllerBase
         await _dbContext.MenuItems.AddRangeAsync(menuItems);
         await _dbContext.SaveChangesAsync();
         
-        var dtos = menuItems.Select(item => new Models.MenuItemDto
+        var dtos = menuItems.Select(item => new Models.MenuItemDto2
         {
             item_name = item.item_name,
             price_cents = item.price_cents,
@@ -137,6 +139,7 @@ public class MenuController : ControllerBase
 
         var dto = new Models.MenuItemDto
         {
+            id = existingItem.id,
             item_name = existingItem.item_name,
             price_cents = existingItem.price_cents,
             available = existingItem.available,

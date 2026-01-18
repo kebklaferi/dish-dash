@@ -312,7 +312,7 @@ namespace DeliveryService.Generated
         public OrderServiceClient(System.Net.Http.HttpClient httpClient)
     #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
-            BaseUrl = "http://localhost:8088/api/orders";
+            BaseUrl = "http://ordersservice:3001";
             _httpClient = httpClient;
             Initialize();
         }
@@ -1865,7 +1865,7 @@ namespace DeliveryService.Generated
         [Newtonsoft.Json.JsonProperty("price", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public float Price { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("specialInstructions", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonProperty("specialInstructions", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string SpecialInstructions { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;

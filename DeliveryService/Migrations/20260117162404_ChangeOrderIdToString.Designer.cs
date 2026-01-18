@@ -12,65 +12,66 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DeliveryService.Migrations
 {
     [DbContext(typeof(DeliveryDbContext))]
-    [Migration("20251130202233_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260117162404_ChangeOrderIdToString")]
+    partial class ChangeOrderIdToString
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
+                .HasAnnotation("ProductVersion", "9.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DeliveryService.Models.Delivery", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
 
-                    b.Property<string>("Address")
+                    b.Property<string>("addres")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("DeliveryDate")
+                    b.Property<DateTime>("delivery_date")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("DriverId")
+                    b.Property<int?>("driver_id")
                         .HasColumnType("integer");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Status")
+                    b.Property<string>("order_id")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<string>("status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("id");
 
                     b.ToTable("Deliveries");
                 });
 
             modelBuilder.Entity("DeliveryService.Models.Driver", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("Occupied")
+                    b.Property<bool>("occupied")
                         .HasColumnType("boolean");
 
-                    b.HasKey("Id");
+                    b.HasKey("id");
 
                     b.ToTable("Drivers");
                 });

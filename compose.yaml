@@ -43,7 +43,12 @@
       dockerfile: DeliveryService/Dockerfile
     expose:
       - "8080"
+    environment:
+      - OrderService__BaseUrl=http://ordersservice:3001
+      - JWT_SECRET=${IDENTITY_SERVICE_JWT_SECRET}
     depends_on:
+      ordersservice:
+        condition: service_healthy
       postgres-delivery:
         condition: service_healthy
     command: >
@@ -94,6 +99,11 @@
     networks:
       - catalog-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 3001"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
       
   postgres-orders:
     image: postgres:16-alpine

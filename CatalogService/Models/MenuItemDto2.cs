@@ -1,6 +1,6 @@
 ﻿namespace CatalogService.Models;
 
-public class MenuItemDto
+public class MenuItemDto2
 {
     public int id { get; set; }
     public string item_name { get; set; } = default!;

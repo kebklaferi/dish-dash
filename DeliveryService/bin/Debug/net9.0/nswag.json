@@ -1,5 +1,5 @@
 ﻿{
-  "runtime": "Net90",
+  "runtime": "WinX64",
   "documentGenerator": {
     "fromDocument": {
       "json": "./orderService.json"

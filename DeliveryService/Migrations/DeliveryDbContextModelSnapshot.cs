@@ -17,7 +17,7 @@ namespace DeliveryService.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
+                .HasAnnotation("ProductVersion", "9.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -40,8 +40,9 @@ namespace DeliveryService.Migrations
                     b.Property<int?>("driver_id")
                         .HasColumnType("integer");
 
-                    b.Property<int>("order_id")
-                        .HasColumnType("integer");
+                    b.Property<string>("order_id")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("status")
                         .IsRequired()

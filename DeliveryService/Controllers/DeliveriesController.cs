@@ -1,20 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DeliveryService.Generated;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DeliveryService.Controllers;
 
 [ApiController]
 [Route("api/delivery")]
+[Authorize]
 public class DeliveriesController : ControllerBase
 {
     private readonly DeliveryDbContext _context;
     private readonly ILogger<DeliveriesController> _logger;
+    private readonly OrderServiceClient _orderServiceClient;
 
-    public DeliveriesController(DeliveryDbContext context, ILogger<DeliveriesController> logger)
+    public DeliveriesController(
+        DeliveryDbContext context, 
+        ILogger<DeliveriesController> logger, 
+        OrderServiceClient orderServiceClient)
     {
         _context = context;
         _logger = logger;
-        
+        _orderServiceClient = orderServiceClient;
     }
     
     [HttpPost("driver")]
@@ -26,30 +34,97 @@ public class DeliveriesController : ControllerBase
     }
 
     [HttpPost("assign")]
+    [Authorize]
     public async Task<IActionResult> AssignDelivery([FromBody] Models.AssignDelivery assignDelivery)
     {
-        var driver = await _context.Drivers.FirstOrDefaultAsync(d => !d.occupied);
-
-        if (driver == null)
+        try
         {
-            return NotFound("No available drivers");
+            var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("User ID not found in token. Available claims: {Claims}", 
+                    string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}")));
+                return Unauthorized("User ID not found in token");
+            }
+
+            var userName = User.FindFirst("name")?.Value ?? User.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown";
+            _logger.LogInformation("User {UserName} (ID: {UserId}) is assigning delivery for order {OrderId}", 
+                userName, userId, assignDelivery.order_id);
+            
+            var order = await _orderServiceClient.OrdersGETAsync(Guid.Parse(assignDelivery.order_id));
+            if (order == null)
+            {
+                _logger.LogWarning("Order {OrderId} not found", assignDelivery.order_id);
+                return NotFound($"Order {assignDelivery.order_id} not found");
+            }
+            
+            var driver = await _context.Drivers.FirstOrDefaultAsync(d => !d.occupied);
+            if (driver == null)
+            {
+                _logger.LogWarning("No available drivers for order {OrderId}", assignDelivery.order_id);
+                return NotFound("No available drivers");
+            }
+            
+            var delivery = new Models.Delivery
+            {
+                order_id = assignDelivery.order_id,
+                addres = assignDelivery.address,
+                delivery_date = DateTime.UtcNow.AddHours(2),
+                status = "Assigned",
+                driver_id = driver.id
+            };
+
+            driver.occupied = true;
+            _context.Deliveries.Add(delivery);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Delivery {DeliveryId} assigned to driver {DriverId} for order {OrderId}", 
+                delivery.id, driver.id, assignDelivery.order_id);
+
+            return Ok(new 
+            { 
+                message = "Delivery assigned successfully",
+                delivery = new
+                {
+                    id = delivery.id,
+                    order_id = delivery.order_id,
+                    address = delivery.addres,
+                    delivery_date = delivery.delivery_date,
+                    status = delivery.status,
+                    driver = new
+                    {
+                        id = driver.id,
+                        name = driver.name
+                    }
+                }
+            });
         }
-
-        var delivery = new Models.Delivery
+        catch (FormatException ex)
         {
-            order_id = assignDelivery.order_id,
-            addres = assignDelivery.address,
-            delivery_date = DateTime.UtcNow.AddHours(2),
-            status = "Assigned",
-            driver_id = driver.id
-        };
-
-        driver.occupied = true;
-        _context.Deliveries.Add(delivery);
-        await _context.SaveChangesAsync();
-        
-        
-        return Ok(delivery);
+            _logger.LogError(ex, "Invalid order ID format: {OrderId}", assignDelivery.order_id);
+            return BadRequest("Invalid order ID format");
+        }
+        catch (ApiException ex)
+        {
+            _logger.LogError(ex, "Failed to fetch order {OrderId} from OrderService. Status: {StatusCode}", 
+                assignDelivery.order_id, ex.StatusCode);
+            
+            if (ex.StatusCode == 401)
+            {
+                return Unauthorized("Not authorized to access this order");
+            }
+            else if (ex.StatusCode == 404)
+            {
+                return NotFound($"Order {assignDelivery.order_id} not found");
+            }
+            
+            return StatusCode(500, "Failed to verify order with OrderService");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while assigning delivery for order {OrderId}", assignDelivery.order_id);
+            return StatusCode(500, "An unexpected error occurred while assigning delivery");
+        }
     }
 
     [HttpPost("{id}/status")]
@@ -63,6 +138,20 @@ public class DeliveriesController : ControllerBase
 
         delivery.status = status;
         await _context.SaveChangesAsync();
+        
+        
+        // Update order status in OrderService if delivered
+        if (status == "Delivered")
+        {
+            try
+            {
+                await _orderServiceClient.StatusAsync(Guid.Parse(delivery.order_id), new Body2{ Status = Body2Status.Delivered});
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to update order {OrderId} status", delivery.order_id);
+            }
+        }
         
         var notificationMessage = status switch
         {
