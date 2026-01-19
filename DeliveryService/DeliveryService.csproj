@@ -39,6 +39,7 @@
 
     <Target Name="NSwag" Condition="'$(RunNSwag)' == true" BeforeTargets="Build">
         <Exec Command="$(NSwagExe) run nswag.json" />
+        <Exec Command="$(NSwagExe) run nswagStatistic.json" />
     </Target>
     
 </Project>
