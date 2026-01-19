@@ -63,11 +63,20 @@ function decodeJWT(token: string): Record<string, any> {
 function createUserFromJWT(token: string, email: string): User {
   const payload = decodeJWT(token);
   
+  // Extract role from JWT, default to CUSTOMER if not found or invalid
+  let role = UserRole.CUSTOMER;
+  if (payload.role) {
+    const roleValue = payload.role.toLowerCase();
+    if (Object.values(UserRole).includes(roleValue as UserRole)) {
+      role = roleValue as UserRole;
+    }
+  }
+  
   return {
     id: payload.userId || payload.id,
     name: payload.username || email.split('@')[0],
     email: payload.email || email,
-    role: UserRole.CUSTOMER,
+    role: role,
   };
 }
 

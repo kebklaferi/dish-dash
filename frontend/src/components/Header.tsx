@@ -4,8 +4,9 @@ import { MapPin } from 'lucide-react';
 
 export function Header() {
   const { user } = useAuth();
-
+  console.log('Header user:', user);
   if (!user) return null;
+  
 
   const getRoleBadge = () => {
     const badges: Record<string, { label: string; className: string }> = {
