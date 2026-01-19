@@ -10,5 +10,6 @@ public class MenuItems
     public bool available { get; set; }
     public string description { get; set; } = default!;
     public string tags { get; set; } = default!;
+    public string imgUrl { get; set; } = "https://media.cnn.com/api/v1/images/stellar/prod/140430115517-06-comfort-foods.jpg?q=w_1110,c_fill";
     
 }
