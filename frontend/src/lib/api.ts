@@ -63,11 +63,20 @@ function decodeJWT(token: string): Record<string, any> {
 function createUserFromJWT(token: string, email: string): User {
   const payload = decodeJWT(token);
   
+  // Extract role from JWT, default to CUSTOMER if not found or invalid
+  let role = UserRole.CUSTOMER;
+  if (payload.role) {
+    const roleValue = payload.role.toLowerCase();
+    if (Object.values(UserRole).includes(roleValue as UserRole)) {
+      role = roleValue as UserRole;
+    }
+  }
+  
   return {
     id: payload.userId || payload.id,
     name: payload.username || email.split('@')[0],
     email: payload.email || email,
-    role: UserRole.CUSTOMER,
+    role: role,
   };
 }
 
@@ -151,10 +160,45 @@ export function logout(): void {
   localStorage.removeItem('user');
 }
 
-// Catalog API functions
-export async function getMenuItems(restaurantId: number): Promise<any[]> {
+// Admin API functions
+export async function getAllUsers(): Promise<any[]> {
   try {
-    const response = await fetch(`${API_ENDPOINTS.catalog}/menus?restaurantId=${restaurantId}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/identity/users`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch users');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error fetching users:', err);
+    throw err;
+  }
+}
+
+export async function getAllOrders(): Promise<any[]> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch all orders');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error fetching all orders:', err);
+    throw err;
+  }
+}
+
+// Catalog API functions
+export async function getMenuItems(restaurantId: string): Promise<any[]> {
+  try {
+    const response = await fetch(`${API_ENDPOINTS.catalog}?restaurantId=${restaurantId}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -172,7 +216,7 @@ export async function getMenuItems(restaurantId: number): Promise<any[]> {
 
 export async function getAllMenuItems(): Promise<any[]> {
   try {
-    const response = await fetch(`${API_ENDPOINTS.catalog}/menus`, {
+    const response = await fetch(`${API_ENDPOINTS.catalog}/all`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -223,6 +267,115 @@ export async function getRestaurantById(id: string): Promise<any> {
     return data.data || data;
   } catch (err: any) {
     console.error('Error fetching restaurant:', err);
+    throw err;
+  }
+}
+
+// Orders API functions
+export async function getUserOrders(): Promise<any[]> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch orders');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error fetching orders:', err);
+    throw err;
+  }
+}
+
+export async function createOrder(orderData: {
+  restaurantId: string;
+  deliveryAddress: string;
+  items: { menuItemId: string; quantity: number; specialInstructions?: string }[];
+  deliveryFee: number;
+  notes?: string;
+  payment: {
+    method: 'CREDIT_CARD' | 'CASH_ON_DELIVERY';
+    cardNumber?: string;
+    expiryMonth?: string;
+    expiryYear?: string;
+    cvv?: string;
+    cardholderName?: string;
+  };
+}): Promise<any> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders`, {
+      method: 'POST',
+      body: JSON.stringify(orderData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create order');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error creating order:', err);
+    throw err;
+  }
+}
+
+// Courier API functions
+export async function getAvailableDeliveries(): Promise<any[]> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch available deliveries');
+    }
+
+    const allOrders = await response.json();
+    // Filter for orders that are ready for delivery
+    return allOrders.filter((order: any) => 
+      ['confirmed', 'preparing', 'ready'].includes(order.status)
+    );
+  } catch (err: any) {
+    console.error('Error fetching available deliveries:', err);
+    throw err;
+  }
+}
+
+export async function getActiveDeliveries(): Promise<any[]> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders?status=on-the-way`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch active deliveries');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error fetching active deliveries:', err);
+    throw err;
+  }
+}
+
+export async function updateOrderStatus(orderId: string, status: string): Promise<any> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders/${orderId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update order status');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error updating order status:', err);
     throw err;
   }
 }

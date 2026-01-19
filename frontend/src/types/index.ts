@@ -31,7 +31,6 @@ export interface Meal {
   price: number;
   image: string;
   restaurantId: string;
-  restaurantName: string;
   category: string;
 }
 
@@ -40,13 +39,27 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  menuItemId: string;
+  name: string;
+  quantity: number;
+  price: number;
+  specialInstructions: string | null;
+}
+
 export interface Order {
   id: string;
-  items: CartItem[];
-  total: number;
-  status: 'pending' | 'preparing' | 'on-the-way' | 'delivered';
-  customerName: string;
-  customerAddress: string;
-  restaurantName: string;
+  customerId: string;
+  restaurantId: string;
+  deliveryAddress: string;
+  totalAmount: number;
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'on-the-way' | 'delivered' | 'cancelled';
+  deliveryFee: number;
+  paymentMethod: 'CREDIT_CARD' | 'CASH_ON_DELIVERY';
+  notes: string | null;
   createdAt: string;
+  updatedAt: string;
+  items: OrderItem[];
 }
