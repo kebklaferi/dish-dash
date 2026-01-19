@@ -1,0 +1,18 @@
+﻿{
+  "runtime": "WinX64",
+  "documentGenerator": {
+    "fromDocument": {
+      "json": "./statisticService.json"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "StatisticServiceClient",
+      "namespace": "DeliveryService.Generated",
+      "generateClientInterfaces": true,
+      "generateDtoTypes": true,
+      "useBaseUrl": true,
+      "output": "Clients/Generated/StatisticServiceClient.cs"
+    }
+  }
+}
