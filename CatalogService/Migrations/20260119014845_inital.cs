@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -18,7 +17,7 @@ namespace CatalogService.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    restaurant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    restaurant_id = table.Column<string>(type: "text", nullable: false),
                     item_name = table.Column<string>(type: "text", nullable: false),
                     price_cents = table.Column<int>(type: "integer", nullable: false),
                     available = table.Column<bool>(type: "boolean", nullable: false),
@@ -29,11 +28,6 @@ namespace CatalogService.Migrations
                 {
                     table.PrimaryKey("PK_MenuItems", x => x.id);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MenuItems_restaurant_id",
-                table: "MenuItems",
-                column: "restaurant_id");
         }
 
         /// <inheritdoc />
