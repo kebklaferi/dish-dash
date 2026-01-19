@@ -30,7 +30,7 @@ public class MenuController : ControllerBase
         => _httpContextAccessor.HttpContext?.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
 
     [HttpGet("all")]
-    public async Task<ActionResult<List<Models.MenuItemDto>>> ListMenuItems()
+    public async Task<ActionResult<List<Models.MenuItems>>> ListMenuItems()
     {
         try
         {
@@ -38,7 +38,7 @@ public class MenuController : ControllerBase
 
             var items = await _dbContext.MenuItems.ToListAsync();
 
-            var dtos = items.Select(item => new Models.MenuItemDto
+            var dtos = items.Select(item => new Models.MenuItems
             {
                 id = item.id,
                 item_name = item.item_name,
@@ -67,7 +67,7 @@ public class MenuController : ControllerBase
     
     
     [HttpGet]
-    public async Task<ActionResult<List<Models.MenuItemDto>>> GetMenuItems([FromQuery(Name = "restaurantId")] int restaurantId)
+    public async Task<ActionResult<List<Models.MenuItemDto>>> GetMenuItems([FromQuery(Name = "restaurantId")] Guid restaurantId)
     {
         try
         {
@@ -98,7 +98,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet("{itemId:int}")]
-    public async Task<ActionResult<Models.MenuItemDto>> GetMenuItem(int restaurant, int itemId)
+    public async Task<ActionResult<Models.MenuItemDto>> GetMenuItem([FromQuery(Name = "restaurantId")] Guid restaurant, int itemId)
     {
         try
         {
@@ -134,7 +134,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Models.MenuItemDto2>> AddMenuItem(int restaurant, [FromBody] Models.MenuItemDto2 menuItemDto)
+    public async Task<ActionResult<Models.MenuItemDto2>> AddMenuItem([FromQuery(Name = "restaurantId")] Guid restaurant, [FromBody] Models.MenuItemDto2 menuItemDto)
     {
         try
         {
@@ -176,7 +176,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost("bulk")]
-    public async Task<ActionResult<List<Models.MenuItemDto2>>> CreateItemsBulk(int restaurantId, [FromBody] List<Models.MenuItemDto2> menuItemDtos)
+    public async Task<ActionResult<List<Models.MenuItemDto2>>> CreateItemsBulk([FromQuery(Name = "restaurantId")] Guid restaurantId, [FromBody] List<Models.MenuItemDto2> menuItemDtos)
     {
         try
         {
@@ -222,7 +222,7 @@ public class MenuController : ControllerBase
     }
     
     [HttpPut("{itemId:int}")]
-    public async Task<IActionResult> UpdateMenuItem(int restaurant, int itemId, [FromBody] Models.MenuItemDto2 updatedItem)
+    public async Task<IActionResult> UpdateMenuItem([FromQuery(Name = "restaurantId")] Guid restaurant, int itemId, [FromBody] Models.MenuItemDto2 updatedItem)
     {
         try
         {
@@ -258,7 +258,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPut("{itemId:int}/availability")]
-    public async Task<ActionResult<Models.MenuItemDto>> UpdateMenuItemAvailability(int restaurant, int itemId, [FromBody] bool availability)
+    public async Task<ActionResult<Models.MenuItemDto>> UpdateMenuItemAvailability([FromQuery(Name = "restaurantId")] Guid restaurant, int itemId, [FromBody] bool availability)
     {
         try
         {
@@ -298,7 +298,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpDelete("{itemId:int}")]
-    public async Task<IActionResult> DeleteMenuItem(int restaurant, int itemId)
+    public async Task<IActionResult> DeleteMenuItem([FromQuery(Name = "restaurantId")] Guid restaurant, int itemId)
     {
         try
         {
@@ -326,9 +326,9 @@ public class MenuController : ControllerBase
             return StatusCode(500, "Internal server error");
         }
     }
-    
+
     [HttpDelete]
-    public async Task<IActionResult> DeleteMenu(int restaurantId)
+    public async Task<IActionResult> DeleteMenu([FromQuery(Name = "restaurantId")] Guid restaurantId)
     {
         try
         {

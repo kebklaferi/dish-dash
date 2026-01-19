@@ -151,3 +151,4 @@ D:\CSProjacts\CatalogService\CatalogService\obj\Debug\net9.0\refint\CatalogServi
 D:\CSProjacts\CatalogService\CatalogService\obj\Debug\net9.0\CatalogService.pdb
 D:\CSProjacts\CatalogService\CatalogService\obj\Debug\net9.0\CatalogService.genruntimeconfig.cache
 D:\CSProjacts\CatalogService\CatalogService\obj\Debug\net9.0\ref\CatalogService.dll
+D:\CSProjacts\CatalogService\CatalogService\bin\Debug\net9.0\RabbitMQ.Client.dll
