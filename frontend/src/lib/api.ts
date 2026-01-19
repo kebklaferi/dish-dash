@@ -181,7 +181,7 @@ export async function getMenuItems(restaurantId: number): Promise<any[]> {
 
 export async function getAllMenuItems(): Promise<any[]> {
   try {
-    const response = await fetch(`${API_ENDPOINTS.catalog}/menus`, {
+    const response = await fetch(`${API_ENDPOINTS.catalog}/all`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -232,6 +232,57 @@ export async function getRestaurantById(id: string): Promise<any> {
     return data.data || data;
   } catch (err: any) {
     console.error('Error fetching restaurant:', err);
+    throw err;
+  }
+}
+
+// Orders API functions
+export async function getUserOrders(): Promise<any[]> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch orders');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error fetching orders:', err);
+    throw err;
+  }
+}
+
+export async function createOrder(orderData: {
+  restaurantId: string;
+  deliveryAddress: string;
+  items: { menuItemId: string; quantity: number; specialInstructions?: string }[];
+  deliveryFee: number;
+  notes?: string;
+  payment: {
+    method: 'CREDIT_CARD' | 'CASH_ON_DELIVERY';
+    cardNumber?: string;
+    expiryMonth?: string;
+    expiryYear?: string;
+    cvv?: string;
+    cardholderName?: string;
+  };
+}): Promise<any> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders`, {
+      method: 'POST',
+      body: JSON.stringify(orderData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create order');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error creating order:', err);
     throw err;
   }
 }

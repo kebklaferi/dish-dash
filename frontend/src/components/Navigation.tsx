@@ -73,7 +73,7 @@ export function Navigation() {
           >
             <div className="relative">
               <item.icon className="w-5 h-5" />
-              {item.badge && item.badge > 0 && (
+              {item.badge !== undefined && (
                 <span className="absolute -top-1.5 -right-1.5 w-4 h-4 flex items-center justify-center bg-accent text-accent-foreground text-[10px] font-bold rounded-full">
                   {item.badge}
                 </span>

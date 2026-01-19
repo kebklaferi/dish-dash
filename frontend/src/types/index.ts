@@ -31,7 +31,6 @@ export interface Meal {
   price: number;
   image: string;
   restaurantId: string;
-  restaurantName: string;
   category: string;
 }
 

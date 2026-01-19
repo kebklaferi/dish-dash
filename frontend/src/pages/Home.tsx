@@ -36,14 +36,14 @@ export default function Home() {
         // Map API response to Meal type
         const mappedMeals = data.map((item: any) => ({
           id: item.id?.toString() || `m${Math.random()}`,
-          name: item.name,
-          description: item.description,
-          price: item.price,
+          name: item.item_name || 'Unnamed Item',
+          description: item.description || '',
+          price: (item.price_cents || 0) / 100, // Convert cents to dollars
           image: item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=500&fit=crop',
           restaurantId: item.restaurant_id?.toString() || 'unknown',
-          restaurantName: item.restaurantName || 'Restaurant',
-          category: item.category || 'Food',
+          category: item.tags || 'Food',
         }));
+      
         setMeals(mappedMeals);
       } catch (err: any) {
         console.error('Failed to fetch meals:', err);
@@ -64,7 +64,6 @@ export default function Home() {
     return meals.filter(
       (meal) =>
         meal.name.toLowerCase().includes(search.toLowerCase()) ||
-        meal.restaurantName.toLowerCase().includes(search.toLowerCase()) ||
         meal.category.toLowerCase().includes(search.toLowerCase())
     );
   }, [meals, search]);
@@ -201,15 +200,6 @@ export default function Home() {
                 <DialogHeader>
                   <DialogTitle className="text-xl">{selectedMeal.name}</DialogTitle>
                 </DialogHeader>
-                <p
-                  className="text-sm text-muted-foreground cursor-pointer hover:text-primary transition-colors"
-                  onClick={() => {
-                    setSelectedMeal(null);
-                    navigate(`/restaurants/${selectedMeal.restaurantId}`);
-                  }}
-                >
-                  {selectedMeal.restaurantName}
-                </p>
                 <p className="text-sm text-muted-foreground mt-3">
                   {selectedMeal.description}
                 </p>
