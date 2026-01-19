@@ -38,24 +38,13 @@ public class MenuController : ControllerBase
 
             var items = await _dbContext.MenuItems.ToListAsync();
 
-            var dtos = items.Select(item => new Models.MenuItems
-            {
-                id = item.id,
-                item_name = item.item_name,
-                price_cents = item.price_cents,
-                available = item.available,
-                description = item.description,
-                tags = item.tags
-            }).ToList();
-            
-
             var rng = new Random();
-            dtos = dtos.OrderBy(_ => rng.Next()).ToList();
-            _logger.LogInfo($"Shuffled {dtos.Count} menu items");
+            var tmpItem = items.OrderBy(_ => rng.Next()).ToList();
+            _logger.LogInfo($"Shuffled {tmpItem.Count} menu items");
 
 
-            _logger.LogInfo($"Retrieved {dtos.Count} menu items");
-            return Ok(dtos);
+            _logger.LogInfo($"Retrieved {tmpItem.Count} menu items");
+            return Ok(tmpItem);
         }
         catch (Exception ex)
         {
@@ -67,7 +56,7 @@ public class MenuController : ControllerBase
     
     
     [HttpGet]
-    public async Task<ActionResult<List<Models.MenuItemDto>>> GetMenuItems([FromQuery(Name = "restaurantId")] Guid restaurantId)
+    public async Task<ActionResult<List<Models.MenuItemDto>>> GetMenuItems([FromQuery(Name = "restaurantId")] string restaurantId)
     {
         try
         {
@@ -98,7 +87,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet("{itemId:int}")]
-    public async Task<ActionResult<Models.MenuItemDto>> GetMenuItem([FromQuery(Name = "restaurantId")] Guid restaurant, int itemId)
+    public async Task<ActionResult<Models.MenuItemDto>> GetMenuItem([FromQuery(Name = "restaurantId")] string restaurant, int itemId)
     {
         try
         {
@@ -134,7 +123,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Models.MenuItemDto2>> AddMenuItem([FromQuery(Name = "restaurantId")] Guid restaurant, [FromBody] Models.MenuItemDto2 menuItemDto)
+    public async Task<ActionResult<Models.MenuItemDto2>> AddMenuItem([FromQuery(Name = "restaurantId")] string restaurant, [FromBody] Models.MenuItemDto2 menuItemDto)
     {
         try
         {
@@ -176,7 +165,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost("bulk")]
-    public async Task<ActionResult<List<Models.MenuItemDto2>>> CreateItemsBulk([FromQuery(Name = "restaurantId")] Guid restaurantId, [FromBody] List<Models.MenuItemDto2> menuItemDtos)
+    public async Task<ActionResult<List<Models.MenuItemDto2>>> CreateItemsBulk([FromQuery(Name = "restaurantId")] string restaurantId, [FromBody] List<Models.MenuItemDto2> menuItemDtos)
     {
         try
         {
@@ -222,7 +211,7 @@ public class MenuController : ControllerBase
     }
     
     [HttpPut("{itemId:int}")]
-    public async Task<IActionResult> UpdateMenuItem([FromQuery(Name = "restaurantId")] Guid restaurant, int itemId, [FromBody] Models.MenuItemDto2 updatedItem)
+    public async Task<IActionResult> UpdateMenuItem([FromQuery(Name = "restaurantId")] string restaurant, int itemId, [FromBody] Models.MenuItemDto2 updatedItem)
     {
         try
         {
@@ -258,7 +247,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPut("{itemId:int}/availability")]
-    public async Task<ActionResult<Models.MenuItemDto>> UpdateMenuItemAvailability([FromQuery(Name = "restaurantId")] Guid restaurant, int itemId, [FromBody] bool availability)
+    public async Task<ActionResult<Models.MenuItemDto>> UpdateMenuItemAvailability([FromQuery(Name = "restaurantId")] string restaurant, int itemId, [FromBody] bool availability)
     {
         try
         {
@@ -298,7 +287,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpDelete("{itemId:int}")]
-    public async Task<IActionResult> DeleteMenuItem([FromQuery(Name = "restaurantId")] Guid restaurant, int itemId)
+    public async Task<IActionResult> DeleteMenuItem([FromQuery(Name = "restaurantId")] string restaurant, int itemId)
     {
         try
         {
@@ -328,7 +317,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteMenu([FromQuery(Name = "restaurantId")] Guid restaurantId)
+    public async Task<IActionResult> DeleteMenu([FromQuery(Name = "restaurantId")] string restaurantId)
     {
         try
         {
