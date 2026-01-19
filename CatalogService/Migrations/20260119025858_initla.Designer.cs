@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CatalogService.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20260119014845_inital")]
-    partial class inital
+    [Migration("20260119025858_initla")]
+    partial class initla
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,10 @@ namespace CatalogService.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("imgUrl")
                         .IsRequired()
                         .HasColumnType("text");
 

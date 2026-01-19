@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CatalogService.Migrations
 {
     /// <inheritdoc />
-    public partial class inital : Migration
+    public partial class initla : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,7 +22,8 @@ namespace CatalogService.Migrations
                     price_cents = table.Column<int>(type: "integer", nullable: false),
                     available = table.Column<bool>(type: "boolean", nullable: false),
                     description = table.Column<string>(type: "text", nullable: false),
-                    tags = table.Column<string>(type: "text", nullable: false)
+                    tags = table.Column<string>(type: "text", nullable: false),
+                    imgUrl = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
