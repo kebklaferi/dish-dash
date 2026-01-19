@@ -36,6 +36,10 @@ namespace CatalogService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("imgUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("item_name")
                         .IsRequired()
                         .HasColumnType("text");
