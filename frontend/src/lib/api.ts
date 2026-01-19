@@ -161,9 +161,9 @@ export function logout(): void {
 }
 
 // Catalog API functions
-export async function getMenuItems(restaurantId: number): Promise<any[]> {
+export async function getMenuItems(restaurantId: string): Promise<any[]> {
   try {
-    const response = await fetch(`${API_ENDPOINTS.catalog}/menus?restaurantId=${restaurantId}`, {
+    const response = await fetch(`${API_ENDPOINTS.catalog}?restaurantId=${restaurantId}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });

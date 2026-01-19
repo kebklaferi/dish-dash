@@ -7,16 +7,25 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ShoppingBag, ArrowLeft, Trash2, ChevronRight, Package, Loader, CreditCard, Banknote } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ShoppingBag, ArrowLeft, Trash2, ChevronRight, Package, Loader, CreditCard, Banknote, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { getUserOrders, createOrder } from '@/lib/api';
+import { Order as OrderType } from '@/types';
 
 export default function Order() {
   const navigate = useNavigate();
   const { items, total, clearCart, itemCount } = useCart();
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<OrderType[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [showProcessingModal, setShowProcessingModal] = useState(false);
+  const [showOrders, setShowOrders] = useState(true);
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'CREDIT_CARD' | 'CASH_ON_DELIVERY'>('CASH_ON_DELIVERY');
   const [cardNumber, setCardNumber] = useState('');
@@ -67,6 +76,14 @@ export default function Order() {
 
     try {
       setIsPlacingOrder(true);
+      
+      // Show processing modal for credit card payments
+      if (paymentMethod === 'CREDIT_CARD') {
+        setShowProcessingModal(true);
+      }
+
+      // Start a minimum 3-second timer for the modal
+      const minDisplayTime = new Promise(resolve => setTimeout(resolve, 3000));
 
       // Group items by restaurant
       const itemsByRestaurant = items.reduce((acc, item) => {
@@ -105,8 +122,10 @@ export default function Order() {
         return createOrder(orderData);
       });
 
-      // Wait for all orders to be created
-      await Promise.all(orderPromises);
+      // Wait for both orders to be created AND minimum display time
+      await Promise.all([...orderPromises, minDisplayTime]);
+
+      setShowProcessingModal(false);
 
       const restaurantCount = Object.keys(itemsByRestaurant).length;
       toast({
@@ -119,6 +138,11 @@ export default function Order() {
       clearCart();
       navigate('/');
     } catch (err: any) {
+      // Wait for minimum time even on error if modal is showing
+      if (paymentMethod === 'CREDIT_CARD') {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+      setShowProcessingModal(false);
       toast({
         title: "Order Failed",
         description: err.message || "Failed to place order. Please try again.",
@@ -155,29 +179,41 @@ export default function Order() {
       <div className="pb-24">
         {/* Order History Section */}
         <div className="px-4 py-4 mb-4">
-          <div className="flex items-center justify-between mb-4">
+          <div 
+            className="flex items-center justify-between mb-4 cursor-pointer"
+            onClick={() => setShowOrders(!showOrders)}
+          >
             <div className="flex items-center gap-2">
               <Package className="w-5 h-5 text-primary" />
               <h2 className="text-lg font-semibold">Your Orders</h2>
             </div>
-            <span className="text-sm font-medium text-muted-foreground">
-              {isLoadingOrders ? '...' : orders.length}
-            </span>
-          </div>
-          {isLoadingOrders ? (
-            <div className="flex justify-center py-8">
-              <Loader className="w-6 h-6 text-primary animate-spin" />
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">
+                {isLoadingOrders ? '...' : orders.length}
+              </span>
+              {showOrders ? (
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              )}
             </div>
-          ) : orders.length > 0 ? (
-            <div className="space-y-3">
-              {orders.map((order) => (
+          </div>
+          {showOrders && (
+            <>
+              {isLoadingOrders ? (
+                <div className="flex justify-center py-8">
+                  <Loader className="w-6 h-6 text-primary animate-spin" />
+                </div>
+              ) : orders.length > 0 ? (
+                <div className="space-y-3">
+                  {orders.map((order) => (
                 <Card key={order.id} className="border shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(order.created_at).toLocaleDateString()}
+                          {new Date(order.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
@@ -189,17 +225,19 @@ export default function Order() {
                     </div>
                     <div className="flex justify-between items-center mt-2">
                       <span className="font-semibold text-primary">
-                        ${((order.total_amount_cents || 0) / 100).toFixed(2)}
+                        ${((order.totalAmount || 0) / 100).toFixed(2)}
                       </span>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <p className="text-sm">No orders yet. Place your first order!</p>
-            </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-sm">No orders yet. Place your first order!</p>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -356,29 +394,41 @@ export default function Order() {
 
       {/* Order History Section */}
       <div className="px-4 py-4 mb-4">
-        <div className="flex items-center justify-between mb-4">
+        <div 
+          className="flex items-center justify-between mb-4 cursor-pointer"
+          onClick={() => setShowOrders(!showOrders)}
+        >
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-primary" />
             <h2 className="text-lg font-semibold">Your Orders</h2>
           </div>
-          <span className="text-sm font-medium text-muted-foreground">
-            {isLoadingOrders ? '...' : orders.length}
-          </span>
-        </div>
-        {isLoadingOrders ? (
-          <div className="flex justify-center py-8">
-            <Loader className="w-6 h-6 text-primary animate-spin" />
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">
+              {isLoadingOrders ? '...' : orders.length}
+            </span>
+            {showOrders ? (
+              <ChevronUp className="w-5 h-5 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+            )}
           </div>
-        ) : orders.length > 0 ? (
-          <div className="space-y-3">
-            {orders.map((order) => (
+        </div>
+        {showOrders && (
+          <>
+            {isLoadingOrders ? (
+              <div className="flex justify-center py-8">
+                <Loader className="w-6 h-6 text-primary animate-spin" />
+              </div>
+            ) : orders.length > 0 ? (
+              <div className="space-y-3">
+                {orders.map((order) => (
               <Card key={order.id} className="border shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(order.created_at).toLocaleDateString()}
+                        {new Date(order.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
@@ -390,17 +440,19 @@ export default function Order() {
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <span className="font-semibold text-primary">
-                      ${((order.total_amount_cents || 0) / 100).toFixed(2)}
+                      ${((order.totalAmount || 0) / 100).toFixed(2)}
                     </span>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <p className="text-sm">No orders yet. Place your first order!</p>
-          </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">No orders yet. Place your first order!</p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -443,6 +495,30 @@ export default function Order() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Processing Payment Modal */}
+      <Dialog open={showProcessingModal} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle className="text-center">Processing Payment</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-8 space-y-4">
+            <div className="relative">
+              <Loader className="w-16 h-16 text-primary animate-spin" />
+              <CreditCard className="w-8 h-8 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            </div>
+            <div className="text-center space-y-2">
+              <p className="font-medium">Processing your payment...</p>
+              <p className="text-sm text-muted-foreground">
+                Please wait while we securely process your credit card transaction.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Do not close this window or press the back button.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

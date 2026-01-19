@@ -1,58 +1,86 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRestaurantById } from '@/lib/api';
-import { useMeals } from '@/context/MealsContext';
+import { getRestaurantById, getMenuItems } from '@/lib/api';
 import { MealCard } from '@/components/MealCard';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Star, Clock, Truck, MapPin } from 'lucide-react';
-import { Restaurant } from '@/types';
+import { ArrowLeft, Star, Clock, Truck, Loader } from 'lucide-react';
+import { Restaurant, Meal } from '@/types';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { UserRole } from '@/types';
 
 export default function RestaurantDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getMealsByRestaurant } = useMeals();
+  const { addToCart } = useCart();
+  const { user } = useAuth();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [meals, setMeals] = useState<Meal[]>([]);
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchRestaurant = async () => {
+    const fetchRestaurantAndMeals = async () => {
       if (!id) return;
       
       try {
         setLoading(true);
-        const data = await getRestaurantById(id);
+        
+        // Fetch restaurant details
+        const restaurantData = await getRestaurantById(id);
         
         // Map the API response to match the Restaurant interface
         const mappedRestaurant: Restaurant = {
-          id: data._id || data.id,
-          name: data.name,
-          image: data.imageUrl || data.image,
-          cuisine: data.cuisine || 'Various',
-          rating: data.rating || 0,
-          deliveryTime: data.preparationTime || data.deliveryTime || '30-40 min',
-          deliveryFee: data.deliveryFee || 0,
-          description: data.description || '',
+          id: restaurantData._id || restaurantData.id,
+          name: restaurantData.name,
+          image: restaurantData.imageUrl || restaurantData.image,
+          cuisine: restaurantData.cuisine || 'Various',
+          rating: restaurantData.rating || 0,
+          deliveryTime: restaurantData.preparationTime || restaurantData.deliveryTime || '30-40 min',
+          deliveryFee: restaurantData.deliveryFee || 0,
+          description: restaurantData.description || '',
         };
         
         setRestaurant(mappedRestaurant);
+        
+        // Fetch meals for this restaurant
+        const mealsData = await getMenuItems(id);
+        
+        // Map meals to match Meal interface
+        const mappedMeals: Meal[] = mealsData.map((item: any) => ({
+          id: item.id?.toString() || `m${Math.random()}`,
+          name: item.item_name || 'Unnamed Item',
+          description: item.description || '',
+          price: (item.price_cents || 0) / 100, // Convert cents to dollars
+          image: item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=500&fit=crop',
+          restaurantId: id,
+          category: item.tags || 'Food',
+        }));
+        
+        setMeals(mappedMeals);
         setError(null);
       } catch (err: any) {
-        console.error('Failed to fetch restaurant:', err);
+        console.error('Failed to fetch restaurant or meals:', err);
         setError(err.message || 'Failed to load restaurant');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRestaurant();
+    fetchRestaurantAndMeals();
   }, [id]);
-
-  const meals = restaurant ? getMealsByRestaurant(restaurant.id) : [];
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <Loader className="w-8 h-8 text-primary animate-spin mb-2" />
         <p className="text-muted-foreground">Loading restaurant...</p>
       </div>
     );
@@ -123,7 +151,11 @@ export default function RestaurantDetail() {
         <h2 className="font-semibold text-lg mb-4">Menu ({meals.length} items)</h2>
         <div className="grid grid-cols-2 gap-3">
           {meals.map((meal) => (
-            <MealCard key={meal.id} meal={meal} />
+            <MealCard
+              key={meal.id}
+              meal={meal}
+              onClick={() => setSelectedMeal(meal)}
+            />
           ))}
         </div>
         {meals.length === 0 && (
@@ -132,6 +164,51 @@ export default function RestaurantDetail() {
           </div>
         )}
       </section>
+
+      {/* Meal Detail Modal */}
+      <Dialog open={!!selectedMeal} onOpenChange={() => setSelectedMeal(null)}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+          {selectedMeal && (
+            <>
+              <div className="relative h-48">
+                <img
+                  src={selectedMeal.image}
+                  alt={selectedMeal.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+              </div>
+              <div className="p-5 -mt-8 relative">
+                <span className="inline-block px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full mb-2">
+                  {selectedMeal.category}
+                </span>
+                <DialogHeader>
+                  <DialogTitle className="text-xl">{selectedMeal.name}</DialogTitle>
+                </DialogHeader>
+                <p className="text-sm text-muted-foreground mt-3">
+                  {selectedMeal.description}
+                </p>
+                <div className="flex items-center justify-between mt-6">
+                  <span className="text-2xl font-bold text-primary">
+                    ${selectedMeal.price.toFixed(2)}
+                  </span>
+                  {user?.role === UserRole.CUSTOMER && (
+                    <Button
+                      variant="gradient"
+                      onClick={() => {
+                        addToCart(selectedMeal);
+                        setSelectedMeal(null);
+                      }}
+                    >
+                      Add to Order
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
