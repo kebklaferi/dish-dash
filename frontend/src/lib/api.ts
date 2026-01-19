@@ -160,6 +160,41 @@ export function logout(): void {
   localStorage.removeItem('user');
 }
 
+// Admin API functions
+export async function getAllUsers(): Promise<any[]> {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/identity/users`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch users');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error fetching users:', err);
+    throw err;
+  }
+}
+
+export async function getAllOrders(): Promise<any[]> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch all orders');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error fetching all orders:', err);
+    throw err;
+  }
+}
+
 // Catalog API functions
 export async function getMenuItems(restaurantId: string): Promise<any[]> {
   try {
@@ -283,6 +318,64 @@ export async function createOrder(orderData: {
     return await response.json();
   } catch (err: any) {
     console.error('Error creating order:', err);
+    throw err;
+  }
+}
+
+// Courier API functions
+export async function getAvailableDeliveries(): Promise<any[]> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch available deliveries');
+    }
+
+    const allOrders = await response.json();
+    // Filter for orders that are ready for delivery
+    return allOrders.filter((order: any) => 
+      ['confirmed', 'preparing', 'ready'].includes(order.status)
+    );
+  } catch (err: any) {
+    console.error('Error fetching available deliveries:', err);
+    throw err;
+  }
+}
+
+export async function getActiveDeliveries(): Promise<any[]> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders?status=on-the-way`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch active deliveries');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error fetching active deliveries:', err);
+    throw err;
+  }
+}
+
+export async function updateOrderStatus(orderId: string, status: string): Promise<any> {
+  try {
+    const response = await fetchWithAuth(`${API_ENDPOINTS.orders}/orders/${orderId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update order status');
+    }
+
+    return await response.json();
+  } catch (err: any) {
+    console.error('Error updating order status:', err);
     throw err;
   }
 }
