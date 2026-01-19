@@ -186,7 +186,7 @@ export default function AdminPanel() {
                 <Card key={meal.id} className="animate-fade-in">
                   <CardContent className="p-4 flex items-center gap-3">
                     <img
-                      src={meal.imageUrl || '/placeholder-meal.jpg'}
+                      src={meal.imgUrl || '/placeholder-meal.jpg'}
                       alt={meal.item_name}
                       className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
                     />
