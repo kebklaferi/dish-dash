@@ -11,6 +11,8 @@ public class CatalogDbContext : DbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Models.MenuItems>().HasIndex(i => i.restaurant_id);
+        modelBuilder.Entity<Models.MenuItems>()
+            .Property(e => e.restaurant_id)
+            .HasColumnType("text"); // allow storing 24\-char IDs as text
     }
 }

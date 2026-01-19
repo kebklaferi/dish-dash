@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace CatalogService.MockData;
 
@@ -14,15 +13,15 @@ public class DataSeeder
         
         if (!dbContext.MenuItems.Any())
         {
-            // deterministic GUIDs for mock restaurants
-            var r1 = Guid.Parse("00000000-0000-0000-0000-000000000001");
-            var r2 = Guid.Parse("00000000-0000-0000-0000-000000000002");
-            var r3 = Guid.Parse("00000000-0000-0000-0000-000000000003");
+            // deterministic UUID strings for mock restaurants
+            var r1 = "695aae1a12406a527715ee29";
+            var r2 = "6964514b1313bc10ba1b5d7a";
+            var r3 = "696451aa1313bc10ba1b5d7e";
 
             var items = new List<Models.MenuItems>
             {
                 // Restaurant 1 - Pizza Place
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r1, 
                     item_name = "Margherita Pizza", 
                     price_cents = 1299, 
@@ -30,7 +29,7 @@ public class DataSeeder
                     description = "Classic pizza with fresh mozzarella, tomato sauce, and basil",
                     tags = "Pizza"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r1, 
                     item_name = "Pepperoni Pizza", 
                     price_cents = 1499, 
@@ -38,7 +37,7 @@ public class DataSeeder
                     description = "Traditional pizza topped with pepperoni and mozzarella cheese",
                     tags = "Pizza"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r1, 
                     item_name = "Hawaiian Pizza", 
                     price_cents = 1599, 
@@ -46,7 +45,7 @@ public class DataSeeder
                     description = "Pizza with ham, pineapple, and mozzarella cheese",
                     tags = "Pizza"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r1, 
                     item_name = "Caesar Salad", 
                     price_cents = 899, 
@@ -54,7 +53,7 @@ public class DataSeeder
                     description = "Fresh romaine lettuce with caesar dressing, croutons, and parmesan",
                     tags = "Salad"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r1, 
                     item_name = "Garlic Bread", 
                     price_cents = 599, 
@@ -64,7 +63,7 @@ public class DataSeeder
                 },
 
                 // Restaurant 2 - Burger Joint
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r2, 
                     item_name = "Classic Burger", 
                     price_cents = 1099, 
@@ -72,7 +71,7 @@ public class DataSeeder
                     description = "Beef patty with lettuce, tomato, onion, and pickles",
                     tags = "Burger"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r2, 
                     item_name = "Cheeseburger", 
                     price_cents = 1199, 
@@ -80,7 +79,7 @@ public class DataSeeder
                     description = "Classic burger topped with melted cheddar cheese",
                     tags = "Burger"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r2, 
                     item_name = "Bacon Burger", 
                     price_cents = 1399, 
@@ -88,7 +87,7 @@ public class DataSeeder
                     description = "Juicy beef burger with crispy bacon and cheese",
                     tags = "Burger"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r2, 
                     item_name = "French Fries", 
                     price_cents = 499, 
@@ -96,7 +95,7 @@ public class DataSeeder
                     description = "Crispy golden potato fries seasoned with salt",
                     tags = "Side"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r2, 
                     item_name = "Onion Rings", 
                     price_cents = 599, 
@@ -106,7 +105,7 @@ public class DataSeeder
                 },
 
                 // Restaurant 3 - Asian Cuisine
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r3, 
                     item_name = "Chicken Pad Thai", 
                     price_cents = 1299, 
@@ -114,23 +113,23 @@ public class DataSeeder
                     description = "Stir-fried rice noodles with chicken, bean sprouts, and tamarind sauce",
                     tags = "Noodles"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r3, 
                     item_name = "Beef Teriyaki", 
                     price_cents = 1599, 
                     available = true,
                     description = "Grilled beef glazed with sweet teriyaki sauce, served with rice",
-                    tags = "Beef,Rice"
+                    tags = "Beef"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r3, 
                     item_name = "Vegetable Spring Rolls", 
                     price_cents = 799, 
                     available = true,
                     description = "Fresh vegetables wrapped in rice paper, served with peanut dipping sauce",
-                    tags = "vegetarian,fresh"
+                    tags = "vegetarian"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r3, 
                     item_name = "Miso Soup", 
                     price_cents = 399, 
@@ -138,7 +137,7 @@ public class DataSeeder
                     description = "Traditional Japanese soup with miso paste, tofu, and seaweed",
                     tags = "Soup"
                 },
-                new() { 
+                new Models.MenuItems { 
                     restaurant_id = r3, 
                     item_name = "Green Tea Ice Cream", 
                     price_cents = 499, 
