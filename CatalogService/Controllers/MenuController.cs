@@ -29,6 +29,43 @@ public class MenuController : ControllerBase
     private string GetCorrelationId() 
         => _httpContextAccessor.HttpContext?.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
 
+    [HttpGet("all")]
+    public async Task<ActionResult<List<Models.MenuItemDto>>> ListMenuItems()
+    {
+        try
+        {
+            _logger.LogInfo("Fetching all menu items");
+
+            var items = await _dbContext.MenuItems.ToListAsync();
+
+            var dtos = items.Select(item => new Models.MenuItemDto
+            {
+                id = item.id,
+                item_name = item.item_name,
+                price_cents = item.price_cents,
+                available = item.available,
+                description = item.description,
+                tags = item.tags
+            }).ToList();
+            
+
+            var rng = new Random();
+            dtos = dtos.OrderBy(_ => rng.Next()).ToList();
+            _logger.LogInfo($"Shuffled {dtos.Count} menu items");
+
+
+            _logger.LogInfo($"Retrieved {dtos.Count} menu items");
+            return Ok(dtos);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error fetching all menu items", ex);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+    
+    
+    
     [HttpGet]
     public async Task<ActionResult<List<Models.MenuItemDto>>> GetMenuItems([FromQuery(Name = "restaurantId")] int restaurantId)
     {
@@ -316,4 +353,3 @@ public class MenuController : ControllerBase
         }
     }
 }
-
