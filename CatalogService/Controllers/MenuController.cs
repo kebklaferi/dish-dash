@@ -56,7 +56,7 @@ public class MenuController : ControllerBase
     
     
     [HttpGet]
-    public async Task<ActionResult<List<Models.MenuItemDto>>> GetMenuItems([FromQuery(Name = "restaurantId")] string restaurantId)
+    public async Task<ActionResult<List<Models.MenuItems>>> GetMenuItems([FromQuery(Name = "restaurantId")] string restaurantId)
     {
         try
         {
@@ -65,19 +65,9 @@ public class MenuController : ControllerBase
             var items = await _dbContext.MenuItems
                 .Where(i => i.restaurant_id == restaurantId && i.available)
                 .ToListAsync();
-                
-            var dtos = items.Select(item => new Models.MenuItemDto
-            {
-                id = item.id,
-                item_name = item.item_name,
-                price_cents = item.price_cents,
-                available = item.available,
-                description = item.description,
-                tags = item.tags
-            }).ToList();
 
-            _logger.LogInfo($"Retrieved {dtos.Count} menu items for restaurant {restaurantId}");
-            return Ok(dtos);
+            _logger.LogInfo($"Retrieved {items.Count} menu items for restaurant {restaurantId}");
+            return Ok(items);
         }
         catch (Exception ex)
         {
